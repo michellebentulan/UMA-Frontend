@@ -1,62 +1,87 @@
 import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { View, Text, Image, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import UmaLogo from "../../assets/svg-images/3.svg"; // Ensure the path is correct
+import SvgImage from "../../assets/svg-images/UMA Logo.svg";
 
-interface TopBarProps {
-  profileImage: string;
-}
-
-const TopBar: React.FC<TopBarProps> = ({ profileImage }) => {
+const TopBar = ({ isOnline }: { isOnline: boolean }) => {
   return (
-    <View style={styles.container}>
-      <View style={styles.leftContainer}>
-        <UmaLogo width={80} height={40} />
-        <Text style={styles.subHeading}>Explore the Marketplace</Text>
-      </View>
-      <View style={styles.rightContainer}>
-        <TouchableOpacity style={styles.iconWrapper}>
-          <Ionicons name="notifications-outline" size={24} color="#3C3C43" />
-        </TouchableOpacity>
-        <Image source={{ uri: profileImage }} style={styles.profileImage} />
+    <View style={styles.topBarContainer}>
+      <View style={styles.topBar}>
+        <View style={styles.logoContainer}>
+          <SvgImage width={85} height={85} />
+          <Text style={styles.subtitle}>Explore the Marketplace</Text>
+        </View>
+
+        <Ionicons
+          name="notifications-outline"
+          size={30}
+          color="#000"
+          style={styles.notificationIcon}
+        />
+
+        <View style={styles.profileContainer}>
+          <Image
+            source={require("../../assets/images/profile.jpg")}
+            style={styles.profileImage}
+          />
+          <View
+            style={[
+              styles.statusDot,
+              { backgroundColor: isOnline ? "green" : "gray" },
+            ]}
+          />
+        </View>
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  topBarContainer: {
+    backgroundColor: "#FFFFFF", // Slight off-white background for the rounded top bar
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 5,
+    // elevation: 5, // Shadow for Android
+  },
+  topBar: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    backgroundColor: "#fff",
   },
-  leftContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+  logoContainer: {
+    justifyContent: "center",
   },
-  subHeading: {
-    marginLeft: 10,
-    fontSize: 16,
-    fontWeight: "400",
-    color: "#8E8E93",
+  subtitle: {
+    fontSize: 15,
+    color: "#8E8E8E",
+    marginTop: -20,
+    fontFamily: "Montserrat_400Regular",
   },
-  rightContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+  notificationIcon: {
+    marginRight: -35,
+    marginHorizontal: 20, // Create spacing between the notification and the profile image
   },
-  iconWrapper: {
-    marginRight: 15,
+  profileContainer: {
+    position: "relative", // To position the status dot over the image
   },
   profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 30, // Circular image
+  },
+  statusDot: {
+    width: 15,
+    height: 15,
+    borderRadius: 10, // Circular dot
+    position: "absolute",
+    bottom: 0, // Positioned at the bottom-right of the image
+    right: 0,
     borderWidth: 2,
-    borderColor: "#3C3C43",
+    borderColor: "#FFF", // White border around the dot for a clean look
   },
 });
 

@@ -12,7 +12,7 @@ import {
   Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import SvgImage from "../../assets/svg-images/3.svg";
+import SvgImage from "../../assets/svg-images/UMA Logo.svg";
 import MessageScreen from "../message-screen/MessageScreen";
 
 const HomeScreen = () => {
@@ -154,7 +154,7 @@ const HomeScreen = () => {
               }}
               scrollEventThrottle={16}
             >
-              {generateDummyContent(5)}
+              {generateDummyContent(30)}
             </ScrollView>
           </>
         );
@@ -294,6 +294,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingTop: 5,
     margin: 3,
+    position: "relative",
   },
 
   logoContainer: {

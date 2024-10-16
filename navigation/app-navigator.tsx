@@ -10,6 +10,8 @@ import { RootStackParamList } from "./type";
 import CompleteProfileScreen from "../screens/complete-profile-screen/CompleteProfileScreen";
 import HomeScreen from "../screens/home-screen/HomeScreen";
 import ChatScreen from "../screens/message-screen/ChatScreen";
+import Home from "../screens/home-screen/home";
+import MessageScreen from "../screens/message-screen/MessageScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>(); // Pass your types here
 
@@ -48,9 +50,19 @@ const AppNavigator = () => {
           options={{ headerShown: false }}
         />
         <Stack.Screen
+          name="MessageScreen"
+          component={MessageScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
           name="ChatScreen"
           component={ChatScreen}
-          options={{ title: "Chat" }} // You can customize the header title here
+          options={{ headerShown: false }} // You can customize the header title here
+        />
+        <Stack.Screen
+          name="Home"
+          component={Home}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>
