@@ -1,69 +1,118 @@
-import React, { useRef } from "react";
+import React from "react";
 import {
-  Animated,
   View,
-  TouchableOpacity,
   Text,
+  TouchableOpacity,
   StyleSheet,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
-} from "react-native"; // Import NativeSyntheticEvent and NativeScrollEvent
+  Animated,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons"; // Add icons from a library like React Native Vector Icons
 
-const BottomNav = () => {
-  const translateY = useRef(new Animated.Value(0)).current;
+interface BottomNavigationProps {
+  activeScreen: string;
+  setActiveScreen: (screen: string) => void;
+  bottomNavOpacity: Animated.Value;
+  bottomNavTranslateY: Animated.Value;
+}
 
-  const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    // Type for 'e'
-    const yOffset = e.nativeEvent.contentOffset.y;
-    if (yOffset > 0) {
-      Animated.timing(translateY, {
-        toValue: 100,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      Animated.timing(translateY, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }
-  };
-
+const BottomNavigation: React.FC<BottomNavigationProps> = ({
+  activeScreen,
+  setActiveScreen,
+  bottomNavOpacity,
+  bottomNavTranslateY,
+}) => {
   return (
-    <Animated.View style={[styles.container, { transform: [{ translateY }] }]}>
-      <TouchableOpacity style={styles.navItem}>
-        <Text>Home</Text>
+    <Animated.View
+      style={[
+        styles.bottomNav,
+        {
+          opacity: bottomNavOpacity,
+          transform: [{ translateY: bottomNavTranslateY }],
+        },
+      ]}
+    >
+      <TouchableOpacity
+        style={styles.navItem}
+        onPress={() => setActiveScreen("Home")}
+      >
+        <Ionicons
+          name={activeScreen === "Home" ? "home" : "home-outline"}
+          size={24}
+          color="#000"
+        />
+        <Text style={styles.navText}>Home</Text>
+        {activeScreen === "Home" && <View style={styles.redDot} />}
       </TouchableOpacity>
-      <TouchableOpacity style={styles.navItem}>
-        <Text>Message</Text>
+
+      <TouchableOpacity
+        style={styles.navItem}
+        onPress={() => setActiveScreen("Message")}
+      >
+        <Ionicons
+          name={
+            activeScreen === "Message" ? "chatbubbles" : "chatbubbles-outline"
+          }
+          size={24}
+          color="#000"
+        />
+        <Text style={styles.navText}>Message</Text>
+        {activeScreen === "Message" && <View style={styles.redDot} />}
       </TouchableOpacity>
-      <TouchableOpacity style={styles.navItem}>
-        <Text>Learn</Text>
+
+      <TouchableOpacity
+        style={styles.navItem}
+        onPress={() => setActiveScreen("Learn")}
+      >
+        <Ionicons
+          name={activeScreen === "Learn" ? "book" : "book-outline"}
+          size={24}
+          color="#000"
+        />
+        <Text style={styles.navText}>Learn</Text>
+        {activeScreen === "Learn" && <View style={styles.redDot} />}
       </TouchableOpacity>
-      <TouchableOpacity style={styles.navItem}>
-        <Text>Profile</Text>
+
+      <TouchableOpacity
+        style={styles.navItem}
+        onPress={() => setActiveScreen("Profile")}
+      >
+        <Ionicons
+          name={activeScreen === "Profile" ? "person" : "person-outline"}
+          size={24}
+          color="#000"
+        />
+        <Text style={styles.navText}>Profile</Text>
+        {activeScreen === "Profile" && <View style={styles.redDot} />}
       </TouchableOpacity>
     </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  bottomNav: {
     flexDirection: "row",
     justifyContent: "space-around",
     paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#E0E0E0",
+    backgroundColor: "#FFF",
     position: "absolute",
     bottom: 0,
     width: "100%",
-    backgroundColor: "#fff",
-    borderTopWidth: 1,
-    borderColor: "#ccc",
   },
   navItem: {
     alignItems: "center",
-    justifyContent: "center",
+  },
+  navText: {
+    fontFamily: "Montserrat_400Regular",
+  },
+  redDot: {
+    width: 6,
+    height: 6,
+    backgroundColor: "red",
+    borderRadius: 3,
+    marginTop: 2,
   },
 });
 
-export default BottomNav;
+export default BottomNavigation;

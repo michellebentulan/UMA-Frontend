@@ -12,5 +12,7 @@ export type RootStackParamList = {
   OTPVerification: undefined;
   CompleteProfile: undefined;
   HomeScreen: undefined;
+  MessageScreen: undefined;
   ChatScreen: { user: Message };
+  Home: undefined;
 };
