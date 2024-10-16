@@ -1,42 +1,59 @@
+// SearchBar.tsx
 import React from "react";
 import { View, TextInput, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons"; // Import Ionicons
+import { Ionicons } from "@expo/vector-icons";
 
-const SearchBar = () => {
+interface SearchBarProps {
+  placeholder?: string;
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({
+  placeholder = "Search Livestock",
+}) => {
   return (
-    <View style={styles.container}>
-      <Ionicons name="search" size={24} color="black" style={styles.icon} />{" "}
-      {/* Search Icon */}
-      <TextInput style={styles.input} placeholder="Search Livestock" />
-      <Ionicons
-        name="filter"
-        size={24}
-        color="black"
-        style={styles.icon}
-      />{" "}
-      {/* Filter Icon */}
+    <View style={styles.searchSection}>
+      <View style={styles.searchContainer}>
+        <TextInput style={styles.searchInput} placeholder={placeholder} />
+        <Ionicons
+          name="search"
+          size={20}
+          color="#888"
+          style={styles.searchIcon}
+        />
+        <Ionicons
+          name="options-outline"
+          size={20}
+          color="#888"
+          style={styles.filterIcon}
+        />
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  searchSection: {
+    marginVertical: 5,
+    paddingHorizontal: 15,
+  },
+  searchContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: "5%",
-    marginVertical: "2%",
     alignItems: "center",
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 30,
+    backgroundColor: "#EEE",
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
   },
-  input: {
+  searchInput: {
     flex: 1,
-    paddingHorizontal: 10,
     fontSize: 16,
+    fontFamily: "Montserrat_400Regular",
   },
-  icon: {
-    marginHorizontal: 10,
+  searchIcon: {
+    marginLeft: 10,
+  },
+  filterIcon: {
+    marginLeft: 10,
   },
 });
 

@@ -174,7 +174,7 @@ const CompleteProfileScreen = () => {
         <View style={{ alignItems: "center", marginTop: 20 }}>
           <TouchableOpacity
             style={styles.saveButton}
-            onPress={() => navigation.navigate("Home")}
+            onPress={() => navigation.navigate("HomeScreen1")}
           >
             <Text style={styles.saveButtonText}>SAVE</Text>
           </TouchableOpacity>

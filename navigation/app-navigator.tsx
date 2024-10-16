@@ -12,6 +12,7 @@ import HomeScreen from "../screens/home-screen/HomeScreen";
 import ChatScreen from "../screens/message-screen/ChatScreen";
 import Home from "../screens/home-screen/home";
 import MessageScreen from "../screens/message-screen/MessageScreen";
+import HomeScreen1 from "../screens/home-screen/homelayout";
 
 const Stack = createNativeStackNavigator<RootStackParamList>(); // Pass your types here
 
@@ -63,6 +64,11 @@ const AppNavigator = () => {
           name="Home"
           component={Home}
           options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="HomeScreen1"
+          component={HomeScreen1}
+          options={{ headerShown: true }}
         />
       </Stack.Navigator>
     </NavigationContainer>

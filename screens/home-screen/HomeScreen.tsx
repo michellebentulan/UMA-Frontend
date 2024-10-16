@@ -14,6 +14,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import SvgImage from "../../assets/svg-images/UMA Logo.svg";
 import MessageScreen from "../message-screen/MessageScreen";
+import TopBar from "../../components/TopBar/TopBar";
 
 const HomeScreen = () => {
   const [activeTab, setActiveTab] = useState("ForSale");
@@ -169,8 +170,9 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
+      <TopBar isOnline={true} />
       {/* Top Bar with Logo, Notification, and Profile */}
-      <View style={styles.topBar}>
+      {/* <View style={styles.topBar}>
         <View style={styles.logoContainer}>
           <SvgImage width={145} height={145} />
           <Text style={styles.subtitle}>Explore the Marketplace</Text>
@@ -195,7 +197,8 @@ const HomeScreen = () => {
             ]}
           />
         </View>
-      </View>
+      </View> */}
+      {/* <TopBar isOnline={true} /> */}
 
       {/* Conditional Content Render */}
       {renderContent()}
