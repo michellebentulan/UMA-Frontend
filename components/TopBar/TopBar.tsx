@@ -38,10 +38,11 @@ const TopBar = ({ isOnline }: { isOnline: boolean }) => {
 
 const styles = StyleSheet.create({
   topBarContainer: {
-    backgroundColor: "#FFFFFF", // Slight off-white background for the rounded top bar
-    paddingVertical: 10,
+    // backgroundColor: "#FFFFFF", // Slight off-white background for the rounded top bar
+    height: 100,
+    paddingVertical: 18,
     paddingHorizontal: 20,
-    shadowColor: "#000",
+    // shadowColor: "#000",
     // shadowOffset: { width: 0, height: 2 },
     // shadowOpacity: 0.1,
     // shadowRadius: 5,
