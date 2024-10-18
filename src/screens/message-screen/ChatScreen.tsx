@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
+  Linking,
+  Alert,
 } from "react-native";
 import { GiftedChat, IMessage } from "react-native-gifted-chat";
 import { RouteProp } from "@react-navigation/native";
@@ -19,8 +21,15 @@ type ChatScreenProps = {
   route: RouteProp<RootStackParamList, "ChatScreen">;
 };
 
+type User = {
+  id: string;
+  name: string;
+  image: string;
+  phone: string; // Ensure phone is defined here
+};
+
 const ChatScreen = ({ route }: ChatScreenProps) => {
-  const { user } = route.params;
+  const { user } = route.params as { user: User };
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [visible, setVisible] = useState(false); // For report menu
@@ -50,6 +59,32 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
 
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
+
+  const handleCallUser = () => {
+    const phoneNumber = user.phone || "1234567890"; // Replace with the actual user's phone number
+    Alert.alert(
+      "Open Dialer",
+      "You will be going to the phone app to call this number. Do you want to continue?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "OK",
+          onPress: () => {
+            Linking.openURL(`tel:${phoneNumber}`).catch((err) =>
+              Alert.alert(
+                "Error",
+                "Unable to open the dialer. Please try again."
+              )
+            );
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
 
   // Function to handle image picking using Expo Image Picker
   const selectImage = async () => {
@@ -108,6 +143,12 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
         {/* User Name */}
         <Text style={styles.userName}>{user.name}</Text>
 
+        {/* Phone Icon */}
+        <TouchableOpacity onPress={handleCallUser} style={styles.callStyle}>
+          {/* <TouchableOpacity> */}
+          <Ionicons name="call-outline" size={26} color="#333" />
+        </TouchableOpacity>
+
         {/* Menu Icon */}
         <Menu
           visible={visible}
@@ -115,7 +156,7 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
             <TouchableOpacity onPress={openMenu}>
               <Ionicons
                 name="information-circle-outline"
-                size={24}
+                size={26}
                 color="#333"
               />
             </TouchableOpacity>
@@ -193,6 +234,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 10,
     color: "#333",
+  },
+  callStyle: {
+    paddingRight: 15,
   },
   inputContainer: {
     flexDirection: "row",

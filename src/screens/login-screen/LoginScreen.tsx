@@ -40,7 +40,7 @@ const LoginScreen = () => {
 
       <View style={styles.middleSection}>
         <LottieView
-          source={require("../../assets/lottie/pin.json")} // Replace with your Lottie file path
+          source={require("../../../assets/lottie/pin.json")} // Replace with your Lottie file path
           autoPlay
           loop
           style={styles.lottie}

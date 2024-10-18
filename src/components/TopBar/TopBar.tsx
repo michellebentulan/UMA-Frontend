@@ -1,9 +1,14 @@
 import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import SvgImage from "../../assets/svg-images/UMA Logo.svg";
+import SvgImage from "../../../assets/svg-images/UMA-Logo.svg";
 
-const TopBar = ({ isOnline }: { isOnline: boolean }) => {
+interface TopBarProps {
+  isOnline: boolean;
+  onNotificationsPress?: () => void; // Optional prop for handling notification icon press
+}
+
+const TopBar = ({ isOnline, onNotificationsPress }: TopBarProps) => {
   return (
     <View style={styles.topBarContainer}>
       <View style={styles.topBar}>
@@ -17,11 +22,12 @@ const TopBar = ({ isOnline }: { isOnline: boolean }) => {
           size={30}
           color="#000"
           style={styles.notificationIcon}
+          onPress={onNotificationsPress} // Handle notification icon press
         />
 
         <View style={styles.profileContainer}>
           <Image
-            source={require("../../assets/images/profile.jpg")}
+            source={require("../../../assets/images/profile.jpg")}
             style={styles.profileImage}
           />
           <View
@@ -38,6 +44,10 @@ const TopBar = ({ isOnline }: { isOnline: boolean }) => {
 
 const styles = StyleSheet.create({
   topBarContainer: {
+    top: 0, // Position it at the top
+    left: 0,
+    right: 0,
+    zIndex: 1000,
     // backgroundColor: "#FFFFFF", // Slight off-white background for the rounded top bar
     height: 100,
     paddingVertical: 18,

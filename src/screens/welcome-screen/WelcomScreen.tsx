@@ -42,7 +42,7 @@ const WelcomeScreen = () => {
       {/* Middle Section (Lottie Animation + Intro Text) */}
       <View style={styles.middleSection}>
         <LottieView
-          source={require("../../assets/lottie/waving.json")}
+          source={require("../../../assets/lottie/waving.json")}
           autoPlay
           loop
           style={styles.lottie}

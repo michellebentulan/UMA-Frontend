@@ -4,10 +4,10 @@
     "slug": "uma-frontend",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/lottie/umb.png",
+    "icon": "./assets/lottie/UMA-logo.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/lottie/umb.png",
+      "image": "./assets/lottie/UMA-logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
