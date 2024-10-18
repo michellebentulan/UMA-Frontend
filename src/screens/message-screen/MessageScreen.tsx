@@ -9,7 +9,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
-import { RootStackParamList } from "../../navigation/type"; // Assuming RootStackParamList is defined correctly
+import { RootStackParamList } from "../../navigation/type";
 
 // Define the Message type
 type Message = {
@@ -18,6 +18,7 @@ type Message = {
   message: string;
   time: string;
   image: string;
+  phone: string;
 };
 
 // Sample messages data
@@ -28,13 +29,15 @@ const messages: Message[] = [
     message: "Yes. The price is still negotiable...",
     time: "1h",
     image: "https://example.com/image1.jpg",
+    phone: "+6369634491842",
   },
   {
     id: "2",
     name: "Mae Fatima Aladad",
     message: "Thank you!",
     time: "15m",
-    image: "https://example.com/image2.jpg",
+    image: "https://example.com/image1.jpg",
+    phone: "09100056575",
   },
   {
     id: "3",
@@ -42,6 +45,7 @@ const messages: Message[] = [
     message: "Available pa ang baka?",
     time: "2h",
     image: "https://example.com/image3.jpg",
+    phone: "+6369634491842",
   },
 ];
 
@@ -81,7 +85,7 @@ const MessageScreen = () => {
         ListEmptyComponent={() => (
           <View style={styles.emptyContainer}>
             <Image
-              source={require("../../assets/images/profile.jpg")}
+              source={require("../../../assets/images/profile.jpg")}
               style={styles.emptyImage}
             />
             <Text style={styles.emptyText}>It's lonely in here...</Text>

@@ -48,7 +48,7 @@ const OTPVerificationScreen = () => {
       <View style={styles.imageContainer}>
         {/* Add the Lottie Animation */}
         <LottieView
-          source={require("../../assets/lottie/pin.json")} // Replace with your Lottie file path
+          source={require("../../../assets/lottie/pin.json")} // Replace with your Lottie file path
           autoPlay
           loop
           style={styles.lottie}

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // Icon package for eye icons
 import LottieView from "lottie-react-native"; // Import LottieView
-import animationData from "../../assets/lottie/log.json";
+import animationData from "../../../assets/lottie/log.json";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { RootStackParamList } from "../../navigation/type";
 import styles from "./CreateAccountStyles";

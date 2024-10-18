@@ -11,7 +11,7 @@ import {
 import RNPickerSelect from "react-native-picker-select";
 import { Ionicons } from "@expo/vector-icons"; // Using Ionicons from expo
 import * as ImagePicker from "expo-image-picker"; // Import ImagePicker for selecting images
-import PlaceholderIcon from "../../assets/svg-images/Vector.svg"; // Import your SVG icon
+import PlaceholderIcon from "../../../assets/svg-images/Vector.svg"; // Import your SVG icon
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation, NavigationProp } from "@react-navigation/native"; // For navigation
 import { RootStackParamList } from "../../navigation/type";

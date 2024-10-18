@@ -13,6 +13,7 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 import TabButtons from "../../components/TabButtons/TabButtons";
 import { Ionicons } from "@expo/vector-icons";
 import MessageScreen from "../message-screen/MessageScreen";
+import LearnScreen from "../learn-screen/LearnScreen";
 
 const HomeScreen1: React.FC = () => {
   const [activeTab, setActiveTab] = useState("ForSale");
@@ -167,7 +168,7 @@ const HomeScreen1: React.FC = () => {
         return <MessageScreen />;
 
       case "Learn":
-        return <MessageScreen />;
+        return <LearnScreen />;
 
       default:
         return <Text>No Screen Selected</Text>;
@@ -176,126 +177,7 @@ const HomeScreen1: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* <View style={styles.topBar}> */}
-      <TopBar isOnline={true} />
-      {/* </View> */}
-
       {renderContent()}
-
-      {/* Search Bar Area */}
-      {/* <View style={styles.searchBar}> */}
-      {/* Search input will go here */}
-      {/* <SearchBar placeholder="Search Livestock" />
-      </View> */}
-
-      {/* Tab Buttons Area */}
-      {/* <View style={styles.tabButtons}>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[
-              styles.forSaleButton,
-              activeTab === "ForSale" && styles.activeButton,
-            ]}
-            onPress={() => setActiveTab("ForSale")}
-          >
-            <Text style={styles.buttonText}>For Sale</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.lookingForButton,
-              activeTab === "LookingFor" && styles.activeButton,
-            ]}
-            onPress={() => setActiveTab("LookingFor")}
-          >
-            <Text style={styles.buttonText}>Looking for</Text>
-          </TouchableOpacity>
-        </View>
-      </View> */}
-
-      {/* Scrollable Content Area */}
-      {/* <View style={styles.scrollableContent}>
-        <ScrollView
-          contentContainerStyle={styles.contentContainer}
-          onScroll={({ nativeEvent }) => {
-            const currentOffset = nativeEvent.contentOffset.y;
-            const isScrollingDown = currentOffset > lastScrollY.current;
-
-            if (Math.abs(currentOffset - lastScrollY.current) > 10) {
-              // Check if the scroll is significant
-              if (isScrollingDown) {
-                // Animate bottom nav hiding (slide down and fade out)
-                Animated.parallel([
-                  Animated.timing(bottomNavOpacity, {
-                    toValue: 0,
-                    duration: 300,
-                    useNativeDriver: true,
-                  }),
-                  Animated.timing(bottomNavTranslateY, {
-                    toValue: 100,
-                    duration: 300,
-                    useNativeDriver: true,
-                  }),
-                  Animated.timing(createListingOpacity, {
-                    toValue: 0,
-                    duration: 300,
-                    useNativeDriver: true,
-                  }),
-                  Animated.timing(createListingTranslateY, {
-                    toValue: 100,
-                    duration: 300,
-                    useNativeDriver: true,
-                  }),
-                ]).start();
-              } else {
-                // Animate bottom nav showing (slide up and fade in)
-                Animated.parallel([
-                  Animated.timing(bottomNavOpacity, {
-                    toValue: 1,
-                    duration: 300,
-                    useNativeDriver: true,
-                  }),
-                  Animated.timing(bottomNavTranslateY, {
-                    toValue: 0,
-                    duration: 300,
-                    useNativeDriver: true,
-                  }),
-                  Animated.timing(createListingOpacity, {
-                    toValue: 1,
-                    duration: 300,
-                    useNativeDriver: true,
-                  }),
-                  Animated.timing(createListingTranslateY, {
-                    toValue: 0,
-                    duration: 300,
-                    useNativeDriver: true,
-                  }),
-                ]).start();
-              }
-            }
-
-            lastScrollY.current = currentOffset;
-          }}
-          scrollEventThrottle={16}
-        >
-          {generateDummyContent(30)}
-        </ScrollView>
-      </View> */}
-
-      {/* {activeScreen === "Home" && ( // Only show the button when on the Home screen
-        <Animated.View
-          style={[
-            styles.createListingButton,
-            {
-              opacity: createListingOpacity,
-              transform: [{ translateY: createListingTranslateY }],
-            },
-          ]}
-        >
-          <TouchableOpacity>
-            <Ionicons name="add-circle" size={50} color="#000" />
-          </TouchableOpacity>
-        </Animated.View>
-      )} */}
 
       {activeScreen === "Home" && ( // Only show the button when on the Home screen
         <Animated.View
@@ -317,75 +199,70 @@ const HomeScreen1: React.FC = () => {
         </Animated.View>
       )}
 
-      {/* Bottom Navigation Area */}
-      <View style={styles.bottomNavigation}>
-        {/* Bottom navigation items will go here */}
-        <Animated.View
-          style={[
-            styles.bottomNav,
-            {
-              opacity: bottomNavOpacity,
-              transform: [{ translateY: bottomNavTranslateY }],
-            },
-          ]}
+      <Animated.View
+        style={[
+          styles.bottomNav,
+          {
+            opacity: bottomNavOpacity,
+            transform: [{ translateY: bottomNavTranslateY }],
+          },
+        ]}
+      >
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => setActiveScreen("Home")}
         >
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => setActiveScreen("Home")}
-          >
-            <Ionicons
-              name={activeScreen === "Home" ? "home" : "home-outline"}
-              size={24}
-              color="#000"
-            />
-            <Text style={styles.navText}>Home</Text>
-            {activeScreen === "Home" && <View style={styles.redDot} />}
-          </TouchableOpacity>
+          <Ionicons
+            name={activeScreen === "Home" ? "home" : "home-outline"}
+            size={24}
+            color="#000"
+          />
+          <Text style={styles.navText}>Home</Text>
+          {activeScreen === "Home" && <View style={styles.redDot} />}
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => setActiveScreen("Message")}
-          >
-            <Ionicons
-              name={
-                activeScreen === "Message"
-                  ? "chatbubbles"
-                  : "chatbubbles-outline"
-              }
-              size={24}
-              color="#000"
-            />
-            <Text style={styles.navText}>Message</Text>
-            {activeScreen === "Message" && <View style={styles.redDot} />}
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => setActiveScreen("Message")}
+        >
+          <Ionicons
+            name={
+              activeScreen === "Message" ? "chatbubbles" : "chatbubbles-outline"
+            }
+            size={24}
+            color="#000"
+          />
+          <Text style={styles.navText}>Message</Text>
+          {activeScreen === "Message" && <View style={styles.redDot} />}
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => setActiveScreen("Learn")}
-          >
-            <Ionicons
-              name={activeScreen === "Learn" ? "book" : "book-outline"}
-              size={24}
-              color="#000"
-            />
-            <Text style={styles.navText}>Learn</Text>
-            {activeScreen === "Learn" && <View style={styles.redDot} />}
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => setActiveScreen("Learn")}
+        >
+          <Ionicons
+            name={activeScreen === "Learn" ? "book" : "book-outline"}
+            size={24}
+            color="#000"
+          />
+          <Text style={styles.navText}>Learn</Text>
+          {activeScreen === "Learn" && <View style={styles.redDot} />}
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => setActiveScreen("Profile")}
-          >
-            <Ionicons
-              name={activeScreen === "Profile" ? "person" : "person-outline"}
-              size={24}
-              color="#000"
-            />
-            <Text style={styles.navText}>Profile</Text>
-            {activeScreen === "Profile" && <View style={styles.redDot} />}
-          </TouchableOpacity>
-        </Animated.View>
-      </View>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => setActiveScreen("Profile")}
+        >
+          <Ionicons
+            name={activeScreen === "Profile" ? "person" : "person-outline"}
+            size={24}
+            color="#000"
+          />
+          <Text style={styles.navText}>Profile</Text>
+          {activeScreen === "Profile" && <View style={styles.redDot} />}
+        </TouchableOpacity>
+      </Animated.View>
+      {/* </View>// */}
     </View>
   );
 };
