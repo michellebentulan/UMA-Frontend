@@ -14,6 +14,21 @@ const LearnScreen: React.FC = () => {
         "Learn about maintaining livestock health with practical tips from experts.",
     },
     {
+      title: "Practice Biosecurity to Save Pigs",
+      department: "Food and Agriculture Organization of the United Nations",
+      videoUrl: "https://www.youtube.com/embed/VIOwydNgAVY?si=kjsnQrK4jfCRkuYW", // YouTube video URL
+      imageUrl: "",
+      description:
+        "Practical steps on how to implement biosecurity to tackle ASF in pig farms, including cleaning and disinfecting pig pens.",
+    },
+    {
+      title: "Goat Farming",
+      department: "Food and Agriculture Organization of the United Nations",
+      videoUrl: "https://www.youtube.com/embed/9fM5D5cM0HU?si=2ek8c1hFOTCvlDGs", // YouTube video URL
+      imageUrl: "",
+      description: "All about goat farming.",
+    },
+    {
       title: "Understanding Animal Breeding",
       department: "Livestock Research Center",
       videoUrl: "",

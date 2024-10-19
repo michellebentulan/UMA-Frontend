@@ -90,8 +90,9 @@ const styles = StyleSheet.create({
     color: "#999",
   },
   mediaContainer: {
-    height: 200,
+    height: 250,
     marginBottom: 10,
+    overflow: "hidden",
   },
   video: {
     flex: 1,
