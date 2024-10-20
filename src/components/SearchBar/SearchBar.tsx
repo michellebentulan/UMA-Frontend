@@ -33,6 +33,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
 const styles = StyleSheet.create({
   searchSection: {
+    height: 60,
     marginVertical: 5,
     paddingHorizontal: 15,
   },

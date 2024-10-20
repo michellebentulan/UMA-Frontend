@@ -13,7 +13,6 @@ import ChatScreen from "../screens/message-screen/ChatScreen";
 import Home from "../screens/home-screen/home";
 import MessageScreen from "../screens/message-screen/MessageScreen";
 import HomeScreen1 from "../screens/home-screen/homelayout";
-import TopBar from "../components/TopBar/TopBar";
 
 const Stack = createNativeStackNavigator<RootStackParamList>(); // Pass your types here
 
@@ -66,11 +65,11 @@ const AppNavigator = () => {
           component={Home}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
+        {/* <Stack.Screen
           name="HomeScreen1"
           component={HomeScreen1}
           options={{
-            headerShown: true,
+            headerShown: false,
             header: (props) => (
               <TopBar
                 isOnline={true}
@@ -82,6 +81,11 @@ const AppNavigator = () => {
               />
             ),
           }}
+        /> */}
+        <Stack.Screen
+          name="HomeScreen1"
+          component={HomeScreen1}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

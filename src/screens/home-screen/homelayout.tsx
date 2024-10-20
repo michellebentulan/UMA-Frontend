@@ -14,6 +14,7 @@ import TabButtons from "../../components/TabButtons/TabButtons";
 import { Ionicons } from "@expo/vector-icons";
 import MessageScreen from "../message-screen/MessageScreen";
 import LearnScreen from "../learn-screen/LearnScreen";
+import { FlatList } from "react-native";
 
 const HomeScreen1: React.FC = () => {
   const [activeTab, setActiveTab] = useState("ForSale");
@@ -177,6 +178,14 @@ const HomeScreen1: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      {/* <View style={styles.top}></View> */}
+      {/* <View style={styles.topBar}>
+        <TopBar isOnline={true} />
+      </View> */}
+      <View style={styles.topBar2}>
+        <TopBar isOnline={true} />
+      </View>
+
       {renderContent()}
 
       {activeScreen === "Home" && ( // Only show the button when on the Home screen
@@ -272,8 +281,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-  topBar: {
-    height: 90,
+  topBar2: {
+    height: 85,
     // marginBottom: 30,
     backgroundColor: "#f8f9fa",
     // Add additional styles for the top bar
@@ -282,13 +291,13 @@ const styles = StyleSheet.create({
     height: 60,
     margin: 15,
     borderRadius: 20,
-    backgroundColor: "#000000",
-    // backgroundColor: "#e9ecef",
+    // backgroundColor: "#000000",
+    backgroundColor: "#e9ecef",
     // Add additional styles for the search bar
   },
   tabButtons: {
-    height: 70,
-    backgroundColor: "#dee2e6",
+    height: 45,
+    backgroundColor: "#ffffff",
     // Add additional styles for tab buttons
   },
   scrollableContent: {
@@ -304,7 +313,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginVertical: 15,
+    marginVertical: 0,
   },
   forSaleButton: {
     backgroundColor: "#E0E0E0",

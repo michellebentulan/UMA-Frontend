@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { WebView } from "react-native-webview";
+import { LinearGradient } from "expo-linear-gradient";
 
 interface LearnCardProps {
   title?: string;
@@ -25,7 +26,10 @@ const LearnCard: React.FC<LearnCardProps> = ({
   const hasText = !!description || !!article;
 
   return (
-    <View style={styles.cardContainer}>
+    <LinearGradient
+      colors={["#ffffff", "#f9f9f9"]}
+      style={styles.cardContainer}
+    >
       {/* Title Section */}
       {title && (
         <View style={styles.header}>
@@ -62,36 +66,43 @@ const LearnCard: React.FC<LearnCardProps> = ({
           <Text style={styles.readMore}>Read More →</Text>
         </TouchableOpacity>
       )}
-    </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   cardContainer: {
     backgroundColor: "#fff",
-    borderRadius: 10,
+    borderRadius: 16,
     shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    padding: 10,
-    marginBottom: 15,
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 6,
+    padding: 15,
+    marginBottom: 20,
+    elevation: 5, // Adds depth on Android
   },
   header: {
     marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    paddingBottom: 5,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#2c3e50",
+    marginBottom: 5,
   },
   department: {
     fontSize: 14,
-    color: "#999",
+    fontWeight: "500",
+    color: "#95a5a6",
   },
   mediaContainer: {
-    height: 250,
+    height: 240,
     marginBottom: 10,
+    borderRadius: 12,
     overflow: "hidden",
   },
   video: {
@@ -99,24 +110,27 @@ const styles = StyleSheet.create({
   },
   image: {
     height: 200,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 10,
   },
   textContent: {
-    marginBottom: 10,
+    marginBottom: 12,
   },
   description: {
-    fontSize: 14,
-    color: "#666",
+    fontSize: 16,
+    lineHeight: 22,
+    color: "#7f8c8d",
   },
   article: {
-    fontSize: 14,
-    color: "#666",
+    fontSize: 16,
+    lineHeight: 22,
+    color: "#7f8c8d",
   },
   readMore: {
-    fontSize: 14,
+    fontSize: 16,
     color: "#e91e63",
-    fontWeight: "bold",
+    fontWeight: "600",
+    marginTop: 10,
   },
 });
 

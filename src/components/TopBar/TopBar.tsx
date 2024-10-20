@@ -1,39 +1,57 @@
 import React from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  useWindowDimensions,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import SvgImage from "../../../assets/svg-images/UMA-Logo.svg";
 
 interface TopBarProps {
   isOnline: boolean;
-  onNotificationsPress?: () => void; // Optional prop for handling notification icon press
+  onNotificationsPress?: () => void;
 }
 
 const TopBar = ({ isOnline, onNotificationsPress }: TopBarProps) => {
+  const { width } = useWindowDimensions(); // Dynamically get the screen width
+
   return (
     <View style={styles.topBarContainer}>
-      <View style={styles.topBar}>
+      <View style={[styles.topBar1, { paddingHorizontal: width * 0.05 }]}>
         <View style={styles.logoContainer}>
-          <SvgImage width={85} height={85} />
-          <Text style={styles.subtitle}>Explore the Marketplace</Text>
+          <SvgImage width={width * 0.18} height={width * 0.18} />
+          <Text style={[styles.subtitle, { fontSize: width * 0.04 }]}>
+            Explore the Marketplace
+          </Text>
         </View>
 
         <Ionicons
           name="notifications-outline"
-          size={30}
+          size={width * 0.08}
           color="#000"
           style={styles.notificationIcon}
-          onPress={onNotificationsPress} // Handle notification icon press
+          onPress={onNotificationsPress}
         />
 
         <View style={styles.profileContainer}>
           <Image
             source={require("../../../assets/images/profile.jpg")}
-            style={styles.profileImage}
+            style={[
+              styles.profileImage,
+              { width: width * 0.12, height: width * 0.12 },
+            ]}
           />
           <View
             style={[
               styles.statusDot,
-              { backgroundColor: isOnline ? "green" : "gray" },
+              {
+                backgroundColor: isOnline ? "green" : "gray",
+                width: width * 0.03,
+                height: width * 0.03,
+                borderRadius: width * 0.02,
+              },
             ]}
           />
         </View>
@@ -44,21 +62,9 @@ const TopBar = ({ isOnline, onNotificationsPress }: TopBarProps) => {
 
 const styles = StyleSheet.create({
   topBarContainer: {
-    top: 0, // Position it at the top
-    left: 0,
-    right: 0,
-    zIndex: 1000,
-    // backgroundColor: "#FFFFFF", // Slight off-white background for the rounded top bar
-    height: 100,
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 5,
-    // elevation: 5, // Shadow for Android
+    marginVertical: 10,
   },
-  topBar: {
+  topBar1: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -67,32 +73,26 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   subtitle: {
-    fontSize: 15,
     color: "#8E8E8E",
-    marginTop: -20,
+    marginTop: -15,
     fontFamily: "Montserrat_400Regular",
   },
   notificationIcon: {
-    marginRight: -35,
-    marginHorizontal: 20, // Create spacing between the notification and the profile image
+    marginRight: -15,
+    marginHorizontal: 10,
   },
   profileContainer: {
-    position: "relative", // To position the status dot over the image
+    position: "relative",
   },
   profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 30, // Circular image
+    borderRadius: 50, // Keep circular shape responsive
   },
   statusDot: {
-    width: 15,
-    height: 15,
-    borderRadius: 10, // Circular dot
     position: "absolute",
-    bottom: 0, // Positioned at the bottom-right of the image
+    bottom: 0,
     right: 0,
     borderWidth: 2,
-    borderColor: "#FFF", // White border around the dot for a clean look
+    borderColor: "#FFF",
   },
 });
 
