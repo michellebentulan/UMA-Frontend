@@ -47,6 +47,46 @@ const messages: Message[] = [
     image: "https://example.com/image3.jpg",
     phone: "+6369634491842",
   },
+  {
+    id: "4",
+    name: "Mark Ian Labuca",
+    message: "Yes. The price is still negotiable...",
+    time: "1h",
+    image: "https://example.com/image1.jpg",
+    phone: "+6369634491842",
+  },
+  {
+    id: "5",
+    name: "Mark Ian Labuca",
+    message: "Yes. The price is still negotiable...",
+    time: "1h",
+    image: "https://example.com/image1.jpg",
+    phone: "+6369634491842",
+  },
+  {
+    id: "6",
+    name: "Mark Ian Labuca",
+    message: "Yes. The price is still negotiable...",
+    time: "1h",
+    image: "https://example.com/image1.jpg",
+    phone: "+6369634491842",
+  },
+  {
+    id: "7",
+    name: "Mark Ian Labuca",
+    message: "Yes. The price is still negotiable...",
+    time: "1h",
+    image: "https://example.com/image1.jpg",
+    phone: "+6369634491842",
+  },
+  {
+    id: "8",
+    name: "Mark Ian Labuca",
+    message: "Yes. The price is still negotiable...",
+    time: "1h",
+    image: "https://example.com/image1.jpg",
+    phone: "+6369634491842",
+  },
 ];
 
 const MessageScreen = () => {

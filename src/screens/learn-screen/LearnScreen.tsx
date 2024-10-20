@@ -6,14 +6,6 @@ const LearnScreen: React.FC = () => {
   // Example data to display multiple Learn Cards
   const learnCardsData = [
     {
-      title: "Best Practices for Livestock Health",
-      department: "Department of Agriculture",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", // YouTube video URL
-      imageUrl: "",
-      description:
-        "Learn about maintaining livestock health with practical tips from experts.",
-    },
-    {
       title: "Practice Biosecurity to Save Pigs",
       department: "Food and Agriculture Organization of the United Nations",
       videoUrl: "https://www.youtube.com/embed/VIOwydNgAVY?si=kjsnQrK4jfCRkuYW", // YouTube video URL
