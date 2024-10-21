@@ -1,6 +1,8 @@
 import React from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import LottieView from "lottie-react-native"; // Lottie animation
+import { useNavigation, NavigationProp } from "@react-navigation/native";
+import { RootStackParamList } from "../../navigation/type";
 
 interface OTPConfirmationModalProps {
   visible: boolean;
@@ -11,6 +13,9 @@ const OTPConfirmationModal: React.FC<OTPConfirmationModalProps> = ({
   visible,
   onContinue,
 }) => {
+  // Use typed navigation
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View style={styles.modalContainer}>
@@ -26,7 +31,12 @@ const OTPConfirmationModal: React.FC<OTPConfirmationModalProps> = ({
             You successfully verified your phone number!
           </Text>
           <TouchableOpacity style={styles.continueButton} onPress={onContinue}>
-            <Text style={styles.continueButtonText}>CONTINUE</Text>
+            <Text
+              style={styles.continueButtonText}
+              onPress={() => navigation.navigate("CompleteProfile")} // Navigate to "CompleteProfile"
+            >
+              CONTINUE
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

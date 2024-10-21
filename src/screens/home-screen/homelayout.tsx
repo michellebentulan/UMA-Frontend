@@ -165,8 +165,17 @@ const HomeScreen1: React.FC = () => {
           </>
         );
 
+      // case "Message":
+      //   return <MessageScreen />;
       case "Message":
-        return <MessageScreen />;
+        return (
+          <MessageScreen
+            bottomNavOpacity={bottomNavOpacity}
+            bottomNavTranslateY={bottomNavTranslateY}
+            createListingOpacity={createListingOpacity}
+            createListingTranslateY={createListingTranslateY}
+          />
+        );
 
       case "Learn":
         return <LearnScreen />;
@@ -282,21 +291,36 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   topBar2: {
-    height: 85,
+    height: 87,
     // marginBottom: 30,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#ffffff",
     // Add additional styles for the top bar
   },
   searchBar: {
-    height: 60,
-    margin: 15,
-    borderRadius: 20,
+    height: 65,
+    margin: 8,
+    borderRadius: 15,
+    paddingHorizontal: 5,
     // backgroundColor: "#000000",
-    backgroundColor: "#e9ecef",
+    backgroundColor: "#ffffff",
     // Add additional styles for the search bar
+  },
+  searchSection: {
+    // height: 60,
+    marginVertical: 10,
+    paddingHorizontal: 10,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#EEE",
+    borderRadius: 15,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
   },
   tabButtons: {
     height: 45,
+    marginBottom: 5,
     backgroundColor: "#ffffff",
     // Add additional styles for tab buttons
   },

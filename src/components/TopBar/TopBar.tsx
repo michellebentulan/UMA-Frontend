@@ -21,7 +21,7 @@ const TopBar = ({ isOnline, onNotificationsPress }: TopBarProps) => {
     <View style={styles.topBarContainer}>
       <View style={[styles.topBar1, { paddingHorizontal: width * 0.05 }]}>
         <View style={styles.logoContainer}>
-          <SvgImage width={width * 0.18} height={width * 0.18} />
+          <SvgImage width={width * 0.21} height={width * 0.18} />
           <Text style={[styles.subtitle, { fontSize: width * 0.04 }]}>
             Explore the Marketplace
           </Text>
@@ -29,7 +29,7 @@ const TopBar = ({ isOnline, onNotificationsPress }: TopBarProps) => {
 
         <Ionicons
           name="notifications-outline"
-          size={width * 0.08}
+          size={width * 0.07}
           color="#000"
           style={styles.notificationIcon}
           onPress={onNotificationsPress}
@@ -62,7 +62,8 @@ const TopBar = ({ isOnline, onNotificationsPress }: TopBarProps) => {
 
 const styles = StyleSheet.create({
   topBarContainer: {
-    marginVertical: 10,
+    marginVertical: 13,
+    marginHorizontal: 0,
   },
   topBar1: {
     flexDirection: "row",
@@ -79,7 +80,8 @@ const styles = StyleSheet.create({
   },
   notificationIcon: {
     marginRight: -15,
-    marginHorizontal: 10,
+    paddingTop: 15,
+    marginHorizontal: 20,
   },
   profileContainer: {
     position: "relative",

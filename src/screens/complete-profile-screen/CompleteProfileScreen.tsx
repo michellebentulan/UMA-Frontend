@@ -15,6 +15,7 @@ import PlaceholderIcon from "../../../assets/svg-images/Vector.svg"; // Import y
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation, NavigationProp } from "@react-navigation/native"; // For navigation
 import { RootStackParamList } from "../../navigation/type";
+import { RFValue } from "react-native-responsive-fontsize";
 
 const CompleteProfileScreen = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -193,7 +194,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   headerContainer: {
-    paddingTop: 15,
+    paddingTop: 18,
     margin: 10,
     marginBottom: 25,
   },
@@ -262,8 +263,23 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: "#FFF",
     fontFamily: "Montserrat_400Regular",
-    fontSize: 16,
+    fontSize: RFValue(15),
   },
+
+  // createAccountButton: {
+  //   width: "75%",
+  //   paddingVertical: "3.8%",
+  //   backgroundColor: "#A14B44",
+  //   borderRadius: 20,
+  //   alignItems: "center",
+  //   marginTop: 5,
+  //   marginBottom: 40,
+  // },
+  // createAccountButtonText: {
+  //   color: "#FFFFFF",
+  //   fontSize: RFValue(15),
+  //   fontFamily: "Montserrat_400Regular",
+  // },
 });
 
 // Picker Select styles

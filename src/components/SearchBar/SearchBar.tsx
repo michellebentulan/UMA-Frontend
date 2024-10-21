@@ -33,17 +33,17 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
 const styles = StyleSheet.create({
   searchSection: {
-    height: 60,
-    marginVertical: 5,
-    paddingHorizontal: 15,
+    // height: 60,
+    marginVertical: 10,
+    paddingHorizontal: 10,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#EEE",
-    borderRadius: 20,
+    borderRadius: 14,
     paddingHorizontal: 15,
-    paddingVertical: 12,
+    paddingVertical: 10,
   },
   searchInput: {
     flex: 1,
