@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: RFValue(13),
+    fontSize: RFValue(12),
     paddingVertical: RFValue(9),
     fontFamily: "Montserrat_400Regular",
   },

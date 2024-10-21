@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // Icon package for eye icons
 import LottieView from "lottie-react-native"; // Import LottieView
-import animationData from "../../../assets/lottie/log.json";
+import animationData from "../../../assets/lottie/pin.json";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { RootStackParamList } from "../../navigation/type";
 import styles from "./CreateAccountStyles";
@@ -143,7 +143,7 @@ const CreateAccountScreen = () => {
         <TouchableOpacity onPress={toggleCheckbox} style={styles.checkbox}>
           <Ionicons
             name={isChecked ? "checkbox-outline" : "square-outline"}
-            size={24}
+            size={27}
             color={isChecked ? "#A14B44" : "#888"}
           />
         </TouchableOpacity>
@@ -158,7 +158,7 @@ const CreateAccountScreen = () => {
         <TouchableOpacity
           style={styles.createAccountButton}
           disabled={!isChecked} // Disable if terms are not agreed
-          onPress={() => navigation.navigate("CompleteProfile")}
+          onPress={() => navigation.navigate("OTPVerification")}
         >
           <Text style={styles.createAccountButtonText}>CREATE ACCOUNT</Text>
         </TouchableOpacity>
