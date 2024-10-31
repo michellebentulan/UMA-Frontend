@@ -6,8 +6,10 @@ import {
   TouchableOpacity,
   Animated,
   ScrollView,
-  TextInput,
+  SafeAreaView,
+  StatusBar,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import TopBar from "../../components/TopBar/TopBar";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import TabButtons from "../../components/TabButtons/TabButtons";
@@ -27,6 +29,23 @@ const HomeScreen1: React.FC = () => {
   const createListingTranslateY = useRef(new Animated.Value(0)).current;
 
   const [menuVisible, setMenuVisible] = useState(false);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // Reset animations for bottom navigation and create listing button
+      Animated.timing(bottomNavOpacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+
+      Animated.timing(bottomNavTranslateY, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }, [])
+  );
 
   const generateDummyContent = (count: number) => {
     return Array.from({ length: count }, (_, i) => (
@@ -186,106 +205,111 @@ const HomeScreen1: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      {/* <View style={styles.top}></View> */}
-      {/* <View style={styles.topBar}>
-        <TopBar isOnline={true} />
-      </View> */}
-      <View style={styles.topBar2}>
-        <TopBar isOnline={true} />
-      </View>
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar backgroundColor="#fff" barStyle="dark-content" />
+      <View style={styles.container}>
+        <View style={styles.topBar2}>
+          <TopBar isOnline={true} />
+        </View>
 
-      {renderContent()}
+        {renderContent()}
 
-      {activeScreen === "Home" && ( // Only show the button when on the Home screen
+        {activeScreen === "Home" && ( // Only show the button when on the Home screen
+          <Animated.View
+            style={[
+              styles.createListingButton,
+              {
+                opacity: createListingOpacity,
+                transform: [{ translateY: createListingTranslateY }],
+              },
+            ]}
+          >
+            <TouchableOpacity
+              onPress={() => {
+                setMenuVisible((prev) => !prev); // Toggle the menu visibility
+              }}
+            >
+              <Ionicons name="add-circle" size={50} color="#000" />
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+
         <Animated.View
           style={[
-            styles.createListingButton,
+            styles.bottomNav,
             {
-              opacity: createListingOpacity,
-              transform: [{ translateY: createListingTranslateY }],
+              opacity: bottomNavOpacity,
+              transform: [{ translateY: bottomNavTranslateY }],
             },
           ]}
         >
           <TouchableOpacity
-            onPress={() => {
-              setMenuVisible((prev) => !prev); // Toggle the menu visibility
-            }}
+            style={styles.navItem}
+            onPress={() => setActiveScreen("Home")}
           >
-            <Ionicons name="add-circle" size={50} color="#000" />
+            <Ionicons
+              name={activeScreen === "Home" ? "home" : "home-outline"}
+              size={24}
+              color="#000"
+            />
+            <Text style={styles.navText}>Home</Text>
+            {activeScreen === "Home" && <View style={styles.redDot} />}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => setActiveScreen("Message")}
+          >
+            <Ionicons
+              name={
+                activeScreen === "Message"
+                  ? "chatbubbles"
+                  : "chatbubbles-outline"
+              }
+              size={24}
+              color="#000"
+            />
+            <Text style={styles.navText}>Message</Text>
+            {activeScreen === "Message" && <View style={styles.redDot} />}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => setActiveScreen("Learn")}
+          >
+            <Ionicons
+              name={activeScreen === "Learn" ? "book" : "book-outline"}
+              size={24}
+              color="#000"
+            />
+            <Text style={styles.navText}>Learn</Text>
+            {activeScreen === "Learn" && <View style={styles.redDot} />}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => setActiveScreen("Profile")}
+          >
+            <Ionicons
+              name={activeScreen === "Profile" ? "person" : "person-outline"}
+              size={24}
+              color="#000"
+            />
+            <Text style={styles.navText}>Profile</Text>
+            {activeScreen === "Profile" && <View style={styles.redDot} />}
           </TouchableOpacity>
         </Animated.View>
-      )}
-
-      <Animated.View
-        style={[
-          styles.bottomNav,
-          {
-            opacity: bottomNavOpacity,
-            transform: [{ translateY: bottomNavTranslateY }],
-          },
-        ]}
-      >
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => setActiveScreen("Home")}
-        >
-          <Ionicons
-            name={activeScreen === "Home" ? "home" : "home-outline"}
-            size={24}
-            color="#000"
-          />
-          <Text style={styles.navText}>Home</Text>
-          {activeScreen === "Home" && <View style={styles.redDot} />}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => setActiveScreen("Message")}
-        >
-          <Ionicons
-            name={
-              activeScreen === "Message" ? "chatbubbles" : "chatbubbles-outline"
-            }
-            size={24}
-            color="#000"
-          />
-          <Text style={styles.navText}>Message</Text>
-          {activeScreen === "Message" && <View style={styles.redDot} />}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => setActiveScreen("Learn")}
-        >
-          <Ionicons
-            name={activeScreen === "Learn" ? "book" : "book-outline"}
-            size={24}
-            color="#000"
-          />
-          <Text style={styles.navText}>Learn</Text>
-          {activeScreen === "Learn" && <View style={styles.redDot} />}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => setActiveScreen("Profile")}
-        >
-          <Ionicons
-            name={activeScreen === "Profile" ? "person" : "person-outline"}
-            size={24}
-            color="#000"
-          />
-          <Text style={styles.navText}>Profile</Text>
-          {activeScreen === "Profile" && <View style={styles.redDot} />}
-        </TouchableOpacity>
-      </Animated.View>
-      {/* </View>// */}
-    </View>
+        {/* </View>// */}
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",
@@ -294,7 +318,8 @@ const styles = StyleSheet.create({
     height: 85,
     // marginBottom: 30,
     backgroundColor: "#ffffff",
-    // Add additional styles for the top bar
+    // borderColor: "red",
+    // borderWidth: 1,
   },
   searchBar: {
     height: 65,
