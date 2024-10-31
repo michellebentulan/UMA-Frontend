@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   topBar2: {
-    height: 85,
+    height: 80,
     // marginBottom: 30,
     backgroundColor: "#ffffff",
     // borderColor: "red",
