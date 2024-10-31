@@ -62,7 +62,7 @@ const TopBar = ({ isOnline, onNotificationsPress }: TopBarProps) => {
 
 const styles = StyleSheet.create({
   topBarContainer: {
-    marginVertical: 5,
+    marginVertical: 0,
     marginHorizontal: 0,
   },
   topBar1: {
