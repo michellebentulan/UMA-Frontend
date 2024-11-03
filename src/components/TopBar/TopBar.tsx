@@ -12,9 +12,15 @@ import SvgImage from "../../../assets/svg-images/UMA-Logo.svg";
 interface TopBarProps {
   isOnline: boolean;
   onNotificationsPress?: () => void;
+  profileImageUrl?: string;
 }
 
-const TopBar = ({ isOnline, onNotificationsPress }: TopBarProps) => {
+const TopBar = ({
+  isOnline,
+  onNotificationsPress,
+  profileImageUrl,
+}: TopBarProps) => {
+  console.log("Received profileImageUrl in TopBar:", profileImageUrl);
   const { width } = useWindowDimensions(); // Dynamically get the screen width
 
   return (
@@ -37,11 +43,16 @@ const TopBar = ({ isOnline, onNotificationsPress }: TopBarProps) => {
 
         <View style={styles.profileContainer}>
           <Image
-            source={require("../../../assets/images/profile.jpg")}
+            source={
+              profileImageUrl && profileImageUrl !== ""
+                ? { uri: profileImageUrl }
+                : require("../../../assets/images/profile.jpg")
+            }
             style={[
               styles.profileImage,
               { width: width * 0.12, height: width * 0.12 },
             ]}
+            resizeMode="cover"
           />
           <View
             style={[
