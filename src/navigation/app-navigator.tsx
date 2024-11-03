@@ -35,21 +35,22 @@ const AppNavigator = () => {
           component={CreateAccountScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
+        {/* <Stack.Screen
           name="OTPVerification"
           component={OTPVerificationScreen}
           options={{ headerShown: false }}
-        />
+        /> */}
         <Stack.Screen
           name="CompleteProfile"
           component={CompleteProfileScreen}
           options={{ headerShown: false }}
+          initialParams={{ userId: "" }} // Default empty userId
         />
-        <Stack.Screen
+        {/* <Stack.Screen
           name="HomeScreen"
           component={HomeScreen}
           options={{ headerShown: false }}
-        />
+        /> */}
         <Stack.Screen
           name="MessageScreen"
           component={MessageScreen}

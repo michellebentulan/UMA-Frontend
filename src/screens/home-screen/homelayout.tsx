@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -17,8 +17,11 @@ import { Ionicons } from "@expo/vector-icons";
 import MessageScreen from "../message-screen/MessageScreen";
 import LearnScreen from "../learn-screen/LearnScreen";
 import { FlatList } from "react-native";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HomeScreen1: React.FC = () => {
+  const [profileImageUrl, setProfileImageUrl] = useState("");
   const [activeTab, setActiveTab] = useState("ForSale");
   const [activeScreen, setActiveScreen] = useState("Home");
   const bottomNavOpacity = useRef(new Animated.Value(1)).current;
@@ -27,8 +30,61 @@ const HomeScreen1: React.FC = () => {
   const lastScrollY = useRef(0);
   const createListingOpacity = useRef(new Animated.Value(1)).current;
   const createListingTranslateY = useRef(new Animated.Value(0)).current;
-
   const [menuVisible, setMenuVisible] = useState(false);
+
+  // useEffect(() => {
+  //   // Fetch user profile on component mount
+  //   const fetchUserProfile = async () => {
+  //     try {
+  //       // Replace `userId` with the actual user ID obtained after login
+  //       const userId = "your_user_id_here"; // TODO: Update this with actual userId
+  //       const response = await axios.get(
+  //         `http://192.168.206.149:3000/users/${userId}`
+  //       );
+  //       const userData = response.data;
+
+  //       // Assuming `userData.profileImage` contains the relative path of the image
+  //       setProfileImageUrl(
+  //         `http://192.168.206.149:3000/uploads/profile-images/${userData.profileImage}`
+  //       );
+  //     } catch (error) {
+  //       console.error("Failed to fetch user profile:", error);
+  //     }
+  //   };
+
+  //   fetchUserProfile();
+  // }, []);
+
+  useEffect(() => {
+    // Fetch user profile on component mount
+    const fetchUserProfile = async () => {
+      try {
+        const userId = await AsyncStorage.getItem("userId"); // Retrieve userId from AsyncStorage
+        if (!userId) {
+          throw new Error("User ID not found");
+        }
+
+        const response = await axios.get(
+          `http://192.168.206.149:3000/users/${userId}`
+        );
+        const userData = response.data;
+
+        console.log("User profile data:", userData);
+
+        if (userData.profile_image) {
+          setProfileImageUrl(
+            `http://192.168.206.149:3000/uploads/profile-images/${userData.profile_image}`
+          );
+        } else {
+          console.warn("Profile image not found in user data");
+        }
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -209,7 +265,11 @@ const HomeScreen1: React.FC = () => {
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
       <View style={styles.container}>
         <View style={styles.topBar2}>
-          <TopBar isOnline={true} />
+          <TopBar
+            isOnline={true}
+            onNotificationsPress={() => console.log("Notifications pressed")}
+            profileImageUrl={profileImageUrl}
+          />
         </View>
 
         {renderContent()}

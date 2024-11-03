@@ -7,17 +7,35 @@ import {
   StyleSheet,
   TextInput,
   Image,
+  Alert,
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import { Ionicons } from "@expo/vector-icons"; // Using Ionicons from expo
 import * as ImagePicker from "expo-image-picker"; // Import ImagePicker for selecting images
 import PlaceholderIcon from "../../../assets/svg-images/Vector.svg"; // Import your SVG icon
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useNavigation, NavigationProp } from "@react-navigation/native"; // For navigation
+import {
+  useNavigation,
+  NavigationProp,
+  RouteProp,
+} from "@react-navigation/native"; // For navigation
 import { RootStackParamList } from "../../navigation/type";
 import { RFValue } from "react-native-responsive-fontsize";
+import axios from "axios";
 
-const CompleteProfileScreen = () => {
+type CompleteProfileScreenRouteProp = RouteProp<
+  RootStackParamList,
+  "CompleteProfile"
+>;
+
+interface CompleteProfileScreenProps {
+  route: CompleteProfileScreenRouteProp;
+}
+
+const CompleteProfileScreen: React.FC<CompleteProfileScreenProps> = ({
+  route,
+}) => {
+  const { userId } = route.params;
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [gender, setGender] = useState<string | undefined>(undefined);
   const [town, setTown] = useState<string | undefined>(undefined);
@@ -41,7 +59,7 @@ const CompleteProfileScreen = () => {
 
     // Launch image picker
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
@@ -60,7 +78,81 @@ const CompleteProfileScreen = () => {
     const currentDate = selectedDate || date || new Date();
     setShowPicker(false);
     setDate(currentDate);
-    setBirthDate(currentDate.toLocaleDateString()); // Format as needed
+    setBirthDate(currentDate.toISOString().split("T")[0]);
+  };
+
+  const validateInputs = () => {
+    if (!birthDate) {
+      Alert.alert("Validation Error", "Please select your birthdate.");
+      return false;
+    }
+
+    if (!gender) {
+      Alert.alert("Validation Error", "Please select your gender.");
+      return false;
+    }
+
+    if (!town) {
+      Alert.alert("Validation Error", "Please select your town/municipality.");
+      return false;
+    }
+
+    if (!barangay) {
+      Alert.alert("Validation Error", "Please select your barangay.");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSaveProfile = async () => {
+    if (!validateInputs()) {
+      return;
+    }
+    try {
+      // Update user profile details
+      const profileData = {
+        birthdate: birthDate,
+        gender: gender,
+        town: town,
+        barangay: barangay,
+        email: "", // Add email field if needed
+      };
+      await axios.put(
+        `http://192.168.206.149:3000/users/complete-profile/${userId}`,
+        profileData
+      );
+
+      // If an image was selected, upload it
+      if (profileImage) {
+        const formData = new FormData();
+        formData.append("file", {
+          uri: profileImage,
+          type: "image/jpeg", // Update based on your file type
+          name: `profile-${Date.now()}.jpg`,
+        } as any);
+
+        await axios.post(
+          `http://192.168.206.149:3000/users/upload-profile-image/${userId}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+      }
+
+      Alert.alert("Success", "Profile updated successfully!", [
+        {
+          text: "OK",
+          onPress: () => navigation.navigate("HomeScreen1"),
+        },
+      ]);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      Alert.alert("Error", "Failed to update the profile. Please try again.");
+    }
   };
 
   return (
@@ -121,7 +213,7 @@ const CompleteProfileScreen = () => {
             items={[
               { label: "Male", value: "male" },
               { label: "Female", value: "female" },
-              { label: "Other", value: "other" },
+              // { label: "Other", value: "other" },
             ]}
             value={gender}
             style={pickerSelectStyles}
@@ -135,9 +227,9 @@ const CompleteProfileScreen = () => {
           <RNPickerSelect
             onValueChange={(value) => setTown(value)}
             items={[
-              { label: "Town 1", value: "town1" },
-              { label: "Town 2", value: "town2" },
-              { label: "Town 3", value: "town3" },
+              { label: "Tubigon", value: "tubigon" },
+              // { label: "Town 2", value: "town2" },
+              // { label: "Town 3", value: "town3" },
             ]}
             value={town}
             style={pickerSelectStyles}
@@ -151,9 +243,43 @@ const CompleteProfileScreen = () => {
           <RNPickerSelect
             onValueChange={(value) => setBarangay(value)}
             items={[
-              { label: "Barangay 1", value: "barangay1" },
-              { label: "Barangay 2", value: "barangay2" },
-              { label: "Barangay 3", value: "barangay3" },
+              { label: "Bagongbanwa Island", value: "Bagongbanwa Island" },
+              { label: "Banlasan", value: "Banlasan" },
+              { label: "Batasan Island", value: "Batasan Island" },
+              {
+                label: "Bilangbilangan Island",
+                value: "Bilangbilangan Island",
+              },
+              { label: "Bosongon", value: "Bosongon" },
+              { label: "Buenos Aires", value: "Buenos Aires" },
+              { label: "Bunacan", value: "Bunacan" },
+              { label: "Cabulijan", value: "Cabulijan" },
+              { label: "Cahayag", value: "Cahayag" },
+              { label: "Cawayanan", value: "Cawayanan" },
+              { label: "Centro", value: "Centro" },
+              { label: "Genonocan", value: "Genonocan" },
+              { label: "Guiwanon", value: "Guiwanon" },
+              { label: "Ilijan Norte", value: "Ilijan Norte" },
+              { label: "Ilijan Sur", value: "Ilijan Sur" },
+              { label: "Libertad", value: "Libertad" },
+              { label: "Macaas", value: "Macaas" },
+              { label: "Matabao", value: "Matabao" },
+              { label: "Mocaboc Island", value: "Mocaboc Island" },
+              { label: "Panadtaran", value: "Panadtaran" },
+              { label: "Panaytayon", value: "Panaytayon" },
+              { label: "Pandan", value: "Pandan" },
+              { label: "Pangapasan Island", value: "Pangapasan Island" },
+              { label: "Pinayagan Norte", value: "Pinayagan Norte" },
+              { label: "Pinayagan Sur", value: "Pinayagan Sur" },
+              { label: "Pooc Occidental", value: "Pooc Occidental" },
+              { label: "Pooc Oriental", value: "Pooc Oriental" },
+              { label: "Potohan", value: "Potohan" },
+              { label: "Talenceras", value: "Talenceras" },
+              { label: "Tan-awan", value: "Tan-awan" },
+              { label: "Tinangnan", value: "Tinangnan" },
+              { label: "Ubojan", value: "Ubojan" },
+              { label: "Ubay Island", value: "Ubay Island" },
+              { label: "Villanueva", value: "Villanueva" },
             ]}
             value={barangay}
             style={pickerSelectStyles}
@@ -175,7 +301,7 @@ const CompleteProfileScreen = () => {
         <View style={{ alignItems: "center", marginTop: 20 }}>
           <TouchableOpacity
             style={styles.saveButton}
-            onPress={() => navigation.navigate("HomeScreen1")}
+            onPress={handleSaveProfile}
           >
             <Text style={styles.saveButtonText}>SAVE</Text>
           </TouchableOpacity>
