@@ -22,6 +22,7 @@ import {
 import { RootStackParamList } from "../../navigation/type";
 import { RFValue } from "react-native-responsive-fontsize";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type CompleteProfileScreenRouteProp = RouteProp<
   RootStackParamList,
@@ -35,7 +36,7 @@ interface CompleteProfileScreenProps {
 const CompleteProfileScreen: React.FC<CompleteProfileScreenProps> = ({
   route,
 }) => {
-  const { userId } = route.params;
+  const { userId, sessionToken } = route.params;
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [gender, setGender] = useState<string | undefined>(undefined);
   const [town, setTown] = useState<string | undefined>(undefined);
@@ -142,6 +143,9 @@ const CompleteProfileScreen: React.FC<CompleteProfileScreenProps> = ({
           }
         );
       }
+
+      // Store userId and sessionToken in AsyncStorage for future use
+      await AsyncStorage.setItem("userId", userId.toString());
 
       Alert.alert("Success", "Profile updated successfully!", [
         {

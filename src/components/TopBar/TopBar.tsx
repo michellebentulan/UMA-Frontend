@@ -20,7 +20,7 @@ const TopBar = ({
   onNotificationsPress,
   profileImageUrl,
 }: TopBarProps) => {
-  console.log("Received profileImageUrl in TopBar:", profileImageUrl);
+  // console.log("Received profileImageUrl in TopBar:", profileImageUrl);
   const { width } = useWindowDimensions(); // Dynamically get the screen width
 
   return (
