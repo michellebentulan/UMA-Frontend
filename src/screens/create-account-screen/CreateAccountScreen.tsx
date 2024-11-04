@@ -102,7 +102,8 @@ const CreateAccountScreen = () => {
             text: "OK",
             onPress: () =>
               navigation.navigate("CompleteProfile", {
-                userId: response.data.id,
+                userId: response.data.user.id,
+                sessionToken: response.data.sessionToken, // Pass the session token
               }),
           },
         ]);

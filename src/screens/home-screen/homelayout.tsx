@@ -32,29 +32,6 @@ const HomeScreen1: React.FC = () => {
   const createListingTranslateY = useRef(new Animated.Value(0)).current;
   const [menuVisible, setMenuVisible] = useState(false);
 
-  // useEffect(() => {
-  //   // Fetch user profile on component mount
-  //   const fetchUserProfile = async () => {
-  //     try {
-  //       // Replace `userId` with the actual user ID obtained after login
-  //       const userId = "your_user_id_here"; // TODO: Update this with actual userId
-  //       const response = await axios.get(
-  //         `http://192.168.206.149:3000/users/${userId}`
-  //       );
-  //       const userData = response.data;
-
-  //       // Assuming `userData.profileImage` contains the relative path of the image
-  //       setProfileImageUrl(
-  //         `http://192.168.206.149:3000/uploads/profile-images/${userData.profileImage}`
-  //       );
-  //     } catch (error) {
-  //       console.error("Failed to fetch user profile:", error);
-  //     }
-  //   };
-
-  //   fetchUserProfile();
-  // }, []);
-
   useEffect(() => {
     // Fetch user profile on component mount
     const fetchUserProfile = async () => {

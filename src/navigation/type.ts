@@ -10,7 +10,7 @@ export type RootStackParamList = {
   Login: undefined; // Add more screens as needed, like CreateAccount
   CreateAccount: undefined;
   // OTPVerification: undefined;
-  CompleteProfile: { userId: string }; // Add userId parameter here
+  CompleteProfile: { userId: string; sessionToken: string };
   // HomeScreen: undefined;
   MessageScreen: undefined;
   ChatScreen: { user: Message };
