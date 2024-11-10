@@ -120,7 +120,7 @@ const CompleteProfileScreen: React.FC<CompleteProfileScreenProps> = ({
         email: "", // Add email field if needed
       };
       await axios.put(
-        `http://192.168.206.149:3000/users/complete-profile/${userId}`,
+        `http://192.168.187.149:3000/users/complete-profile/${userId}`,
         profileData
       );
 
@@ -134,7 +134,7 @@ const CompleteProfileScreen: React.FC<CompleteProfileScreenProps> = ({
         } as any);
 
         await axios.post(
-          `http://192.168.206.149:3000/users/upload-profile-image/${userId}`,
+          `http://192.168.187.149:3000/users/upload-profile-image/${userId}`,
           formData,
           {
             headers: {

@@ -86,7 +86,7 @@ const CreateAccountScreen = () => {
 
     try {
       const response = await axios.post(
-        "http://192.168.206.149:3000/users/create-account",
+        "http://192.168.137.29:3000/users/create-account",
         // "http://localhost:3000/users/create-account",
         {
           first_name: firstName,
