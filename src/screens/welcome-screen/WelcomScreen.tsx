@@ -10,6 +10,7 @@ import {
 import styles from "./WelcomeScreenStyles"; // Import styles from a separate file
 import { useNavigation, NavigationProp } from "@react-navigation/native"; // For navigation
 import { RootStackParamList } from "../../navigation/type";
+import SellLivestockScreen from "../sell-livestock-screen/SellLivestockScreen";
 
 const WelcomeScreen = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -68,7 +69,7 @@ const WelcomeScreen = () => {
 
         <TouchableOpacity
           style={styles.createAccountButton}
-          onPress={() => navigation.navigate("CreateAccount")}
+          onPress={() => navigation.navigate("BuyLivestock")}
           // Add this route if you have it
         >
           <Text style={styles.createAccountButtonText}>CREATE ACCOUNT</Text>

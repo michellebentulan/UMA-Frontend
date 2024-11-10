@@ -8,6 +8,8 @@ import {
   ScrollView,
   SafeAreaView,
   StatusBar,
+  BackHandler,
+  Alert,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import TopBar from "../../components/TopBar/TopBar";
@@ -16,9 +18,12 @@ import TabButtons from "../../components/TabButtons/TabButtons";
 import { Ionicons } from "@expo/vector-icons";
 import MessageScreen from "../message-screen/MessageScreen";
 import LearnScreen from "../learn-screen/LearnScreen";
+import ProfileScreen from "../profile-screen/ProfileScreen";
 import { FlatList } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation, NavigationProp } from "@react-navigation/native"; // For navigation
+import { RootStackParamList } from "../../navigation/type";
 
 const HomeScreen1: React.FC = () => {
   const [profileImageUrl, setProfileImageUrl] = useState("");
@@ -31,6 +36,7 @@ const HomeScreen1: React.FC = () => {
   const createListingOpacity = useRef(new Animated.Value(1)).current;
   const createListingTranslateY = useRef(new Animated.Value(0)).current;
   const [menuVisible, setMenuVisible] = useState(false);
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>(); // Use typed navigation
 
   useEffect(() => {
     // Fetch user profile on component mount
@@ -42,7 +48,7 @@ const HomeScreen1: React.FC = () => {
         }
 
         const response = await axios.get(
-          `http://192.168.206.149:3000/users/${userId}`
+          `http://192.168.187.149:3000/users/${userId}`
         );
         const userData = response.data;
 
@@ -50,7 +56,7 @@ const HomeScreen1: React.FC = () => {
 
         if (userData.profile_image) {
           setProfileImageUrl(
-            `http://192.168.206.149:3000/uploads/profile-images/${userData.profile_image}`
+            `http://192.168.187.149:3000/uploads/profile-images/${userData.profile_image}`
           );
         } else {
           console.warn("Profile image not found in user data");
@@ -77,6 +83,44 @@ const HomeScreen1: React.FC = () => {
         duration: 300,
         useNativeDriver: true,
       }).start();
+
+      // Handle back button behavior to prevent going back to profile screen
+      const onBackPress = () => {
+        Alert.alert("Exit App", "Do you want to exit the app?", [
+          { text: "Cancel", style: "cancel" },
+          {
+            // text: "Yes", onPress: () => BackHandler.exitApp()
+
+            text: "Yes",
+            onPress: async () => {
+              try {
+                const sessionToken = await AsyncStorage.getItem("sessionToken");
+
+                if (sessionToken) {
+                  // Make API call to set the session to expire in 2 minutes
+                  await axios.put(
+                    "http://192.168.187.149:3000/users/expire-session",
+                    {
+                      sessionToken,
+                    }
+                  );
+                }
+                BackHandler.exitApp();
+              } catch (error) {
+                console.error("Error expiring session:", error);
+              }
+            },
+          },
+        ]);
+        return true;
+      };
+
+      BackHandler.addEventListener("hardwareBackPress", onBackPress);
+
+      // Cleanup function to remove event listener
+      return () => {
+        BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+      };
     }, [])
   );
 
@@ -198,7 +242,7 @@ const HomeScreen1: React.FC = () => {
                   style={styles.menuItem}
                   onPress={() => {
                     setMenuVisible(false);
-                    console.log("Sell Livestock");
+                    navigation.navigate("SellLivestock"); // Navigate to Sell Livestock screen
                   }}
                 >
                   <Text style={styles.menuText}>Sell Livestock</Text>
@@ -207,7 +251,7 @@ const HomeScreen1: React.FC = () => {
                   style={styles.menuItem}
                   onPress={() => {
                     setMenuVisible(false);
-                    console.log("Look for Livestock");
+                    navigation.navigate("BuyLivestock"); // Navigate to Buy Livestock screen
                   }}
                 >
                   <Text style={styles.menuText}>Look for Livestock</Text>
@@ -217,8 +261,6 @@ const HomeScreen1: React.FC = () => {
           </>
         );
 
-      // case "Message":
-      //   return <MessageScreen />;
       case "Message":
         return (
           <MessageScreen
@@ -232,6 +274,58 @@ const HomeScreen1: React.FC = () => {
       case "Learn":
         return <LearnScreen />;
 
+      // case "Profile":
+      //   // Profile screen content
+      //   return <ProfileScreen />;
+
+      case "Profile":
+        return (
+          <>
+            <ProfileScreen />
+
+            {menuVisible && (
+              <View style={styles.menu}>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => {
+                    setMenuVisible(false);
+                    navigation.navigate("SellLivestock");
+                  }}
+                >
+                  <Text style={styles.menuText}>Sell Livestock</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => {
+                    setMenuVisible(false);
+                    navigation.navigate("BuyLivestock");
+                  }}
+                >
+                  <Text style={styles.menuText}>Look for Livestock</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            <Animated.View
+              style={[
+                styles.createListingButton,
+                {
+                  opacity: createListingOpacity,
+                  transform: [{ translateY: createListingTranslateY }],
+                },
+              ]}
+            >
+              <TouchableOpacity
+                onPress={() => {
+                  setMenuVisible((prev) => !prev);
+                }}
+              >
+                <Ionicons name="add-circle" size={50} color="#000" />
+              </TouchableOpacity>
+            </Animated.View>
+          </>
+        );
+
       default:
         return <Text>No Screen Selected</Text>;
     }
@@ -241,13 +335,15 @@ const HomeScreen1: React.FC = () => {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
       <View style={styles.container}>
-        <View style={styles.topBar2}>
-          <TopBar
-            isOnline={true}
-            onNotificationsPress={() => console.log("Notifications pressed")}
-            profileImageUrl={profileImageUrl}
-          />
-        </View>
+        {activeScreen !== "Profile" && (
+          <View style={styles.topBar2}>
+            <TopBar
+              isOnline={true}
+              onNotificationsPress={() => console.log("Notifications pressed")}
+              profileImageUrl={profileImageUrl}
+            />
+          </View>
+        )}
 
         {renderContent()}
 

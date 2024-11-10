@@ -8,11 +8,12 @@ import CreateAccountScreen from "../screens/create-account-screen/CreateAccountS
 import OTPVerificationScreen from "../screens/otp-pin-screen/OTPVerificationScreen";
 import { RootStackParamList } from "./type";
 import CompleteProfileScreen from "../screens/complete-profile-screen/CompleteProfileScreen";
-import HomeScreen from "../screens/home-screen/HomeScreen";
 import ChatScreen from "../screens/message-screen/ChatScreen";
 import Home from "../screens/home-screen/home";
 import MessageScreen from "../screens/message-screen/MessageScreen";
 import HomeScreen1 from "../screens/home-screen/homelayout";
+import SellLivestockScreen from "../screens/sell-livestock-screen/SellLivestockScreen";
+import BuyLivestockScreen from "../screens/buy-livestock-screen/BuyLivestockScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>(); // Pass your types here
 
@@ -66,26 +67,20 @@ const AppNavigator = () => {
           component={Home}
           options={{ headerShown: false }}
         />
-        {/* <Stack.Screen
-          name="HomeScreen1"
-          component={HomeScreen1}
-          options={{
-            headerShown: false,
-            header: (props) => (
-              <TopBar
-                isOnline={true}
-                onNotificationsPress={() => {
-                  // Handle notifications logic
-                  console.log("Notifications pressed!");
-                }}
-                {...props}
-              />
-            ),
-          }}
-        /> */}
         <Stack.Screen
           name="HomeScreen1"
           component={HomeScreen1}
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="SellLivestock"
+          component={SellLivestockScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="BuyLivestock"
+          component={BuyLivestockScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
