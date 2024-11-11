@@ -231,7 +231,7 @@ const CompleteProfileScreen: React.FC<CompleteProfileScreenProps> = ({
           <RNPickerSelect
             onValueChange={(value) => setTown(value)}
             items={[
-              { label: "Tubigon", value: "tubigon" },
+              { label: "Tubigon", value: "Tubigon" },
               // { label: "Town 2", value: "town2" },
               // { label: "Town 3", value: "town3" },
             ]}

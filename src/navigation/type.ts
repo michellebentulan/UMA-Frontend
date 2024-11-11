@@ -18,4 +18,11 @@ export type RootStackParamList = {
   HomeScreen1: undefined;
   SellLivestock: undefined;
   BuyLivestock: undefined;
+  ProfileScreen: undefined;
+  MapViewScreen: {
+    town: string;
+    barangay: string;
+    latitude: number;
+    longitude: number;
+  };
 };

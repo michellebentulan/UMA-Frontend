@@ -69,7 +69,7 @@ const WelcomeScreen = () => {
 
         <TouchableOpacity
           style={styles.createAccountButton}
-          onPress={() => navigation.navigate("BuyLivestock")}
+          onPress={() => navigation.navigate("CreateAccount")}
           // Add this route if you have it
         >
           <Text style={styles.createAccountButtonText}>CREATE ACCOUNT</Text>

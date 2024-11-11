@@ -11,15 +11,151 @@ import { RFValue } from "react-native-responsive-fontsize";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation, NavigationProp } from "@react-navigation/native";
+import { RootStackParamList } from "../../navigation/type";
 
 const ProfileScreen: React.FC = () => {
   const [profileImageUrl, setProfileImageUrl] = useState("");
   const [userName, setUserName] = useState("");
   const [location, setLocation] = useState("");
+  const [latitude, setLatitude] = useState<number | undefined>(undefined);
+  const [longitude, setLongitude] = useState<number | undefined>(undefined);
+  const [town, setTown] = useState<string | undefined>(undefined);
+  const [barangay, setBarangay] = useState<string | undefined>(undefined);
   const [phoneNumber, setPhoneNumber] = useState("");
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+  //   useEffect(() => {
+  //     // Fetch user profile data from backend on component mount
+  //     const fetchUserProfile = async () => {
+  //       try {
+  //         const userId = await AsyncStorage.getItem("userId"); // Retrieve userId from AsyncStorage
+  //         if (!userId) {
+  //           throw new Error("User ID not found");
+  //         }
+
+  //         const response = await axios.get(
+  //           `http://192.168.187.149:3000/users/${userId}`
+  //         );
+  //         const userData = response.data;
+
+  //         // Update state with fetched data
+  //         if (userData) {
+  //           setUserName(`${userData.first_name} ${userData.last_name}`);
+  //           setPhoneNumber(userData.phone_number);
+  //           if (userData.profile_image) {
+  //             setProfileImageUrl(
+  //               `http://192.168.187.149:3000/uploads/profile-images/${userData.profile_image}`
+  //             );
+  //           }
+
+  //           // Fetch associated location data
+  //           if (userData.location) {
+  //             setLocation(
+  //               userData.location.barangay
+  //                 ? `${userData.location.barangay}, ${userData.location.town}`
+  //                 : "Location not set"
+  //             );
+  //             setLatitude(userData.location.latitude);
+  //             setLongitude(userData.location.longitude);
+  //             setTown(userData.location.town);
+  //             setBarangay(userData.location.barangay);
+  //           } else {
+  //             setLocation("Location not set");
+  //           }
+  //         }
+  //       } catch (error) {
+  //         console.error("Failed to fetch user profile:", error);
+  //         Alert.alert("Error", "Failed to fetch user profile. Please try again.");
+  //       }
+  //     };
+
+  //     fetchUserProfile();
+  //   }, []);
+
+  //   useEffect(() => {
+  //     // Fetch user profile data from backend on component mount
+  //     const fetchUserProfile = async () => {
+  //       try {
+  //         const userId = await AsyncStorage.getItem("userId"); // Retrieve userId from AsyncStorage
+  //         if (!userId) {
+  //           throw new Error("User ID not found");
+  //         }
+
+  //         // Fetch user profile
+  //         const response = await axios.get(
+  //           `http://192.168.187.149:3000/users/${userId}`
+  //         );
+  //         const userData = response.data;
+
+  //         // Update state with fetched data
+  //         if (userData) {
+  //           console.log("User Data:", userData);
+  //           setUserName(`${userData.first_name} ${userData.last_name}`);
+  //           setPhoneNumber(userData.phone_number);
+  //           if (userData.profile_image) {
+  //             setProfileImageUrl(
+  //               `http://192.168.187.149:3000/uploads/profile-images/${userData.profile_image}`
+  //             );
+  //           }
+
+  //           // Set town and barangay
+  //           setTown(userData.town);
+  //           setBarangay(userData.barangay);
+
+  //           // Fetch associated location data based on town and barangay
+  //           if (userData.town && userData.barangay) {
+  //             console.log(
+  //               "Fetching location for:",
+  //               userData.town,
+  //               userData.barangay
+  //             );
+  //             const locationResponse = await axios.get(
+  //               `http://192.168.187.149:3000/locations?town=${userData.town}&barangay=${userData.barangay}`
+  //             );
+  //             const locationData = locationResponse.data;
+
+  //             console.log("Location Data:", locationData);
+
+  //             if (locationData.length > 0) {
+  //               setLatitude(locationData[0].latitude);
+  //               setLongitude(locationData[0].longitude);
+  //               setLocation(`${userData.barangay}, ${userData.town}`);
+  //             } else {
+  //               setLocation("Location not set");
+  //             }
+  //           } else {
+  //             setLocation("Location not set");
+  //           }
+  //         }
+  //       } catch (error) {
+  //         console.error("Failed to fetch user profile:", error);
+  //         Alert.alert("Error", "Failed to fetch user profile. Please try again.");
+  //       }
+  //     };
+
+  //     fetchUserProfile();
+  //   }, []);
+
+  //   const handleViewOnMap = () => {
+  //     if (
+  //       latitude !== undefined &&
+  //       longitude !== undefined &&
+  //       town !== undefined &&
+  //       barangay !== undefined
+  //     ) {
+  //       navigation.navigate("MapViewScreen", {
+  //         town,
+  //         barangay,
+  //         latitude,
+  //         longitude,
+  //       });
+  //     } else {
+  //       Alert.alert("Location Error", "Location coordinates are not available.");
+  //     }
+  //   };
 
   useEffect(() => {
-    // Fetch user profile data from backend on component mount
     const fetchUserProfile = async () => {
       try {
         const userId = await AsyncStorage.getItem("userId"); // Retrieve userId from AsyncStorage
@@ -27,6 +163,7 @@ const ProfileScreen: React.FC = () => {
           throw new Error("User ID not found");
         }
 
+        // Fetch user profile
         const response = await axios.get(
           `http://192.168.187.149:3000/users/${userId}`
         );
@@ -34,17 +171,42 @@ const ProfileScreen: React.FC = () => {
 
         // Update state with fetched data
         if (userData) {
+          console.log("User Data:", userData);
           setUserName(`${userData.first_name} ${userData.last_name}`);
-          setLocation(
-            userData.barangay
-              ? `${userData.barangay}, ${userData.town}`
-              : "Location not set"
-          );
           setPhoneNumber(userData.phone_number);
           if (userData.profile_image) {
             setProfileImageUrl(
               `http://192.168.187.149:3000/uploads/profile-images/${userData.profile_image}`
             );
+          }
+
+          // Set town and barangay
+          setTown(userData.town);
+          setBarangay(userData.barangay);
+
+          // Fetch associated location data based on town and barangay
+          if (userData.town && userData.barangay) {
+            console.log(
+              "Fetching location for:",
+              userData.town,
+              userData.barangay
+            );
+            const locationResponse = await axios.get(
+              `http://192.168.187.149:3000/locations?town=${userData.town}&barangay=${userData.barangay}`
+            );
+            const locationData = locationResponse.data;
+
+            console.log("Location Data:", locationData);
+
+            if (locationData.length > 0) {
+              setLatitude(Number(locationData[0].latitude)); // Convert to number
+              setLongitude(Number(locationData[0].longitude)); // Convert to number
+              setLocation(`${userData.barangay}, ${userData.town}`);
+            } else {
+              setLocation("Location not set");
+            }
+          } else {
+            setLocation("Location not set");
           }
         }
       } catch (error) {
@@ -55,6 +217,37 @@ const ProfileScreen: React.FC = () => {
 
     fetchUserProfile();
   }, []);
+
+  const handleViewOnMap = () => {
+    try {
+      console.log("Attempting to navigate to MapViewScreen with params:");
+      console.log("Latitude:", latitude);
+      console.log("Longitude:", longitude);
+      console.log("Town:", town);
+      console.log("Barangay:", barangay);
+      if (
+        latitude !== undefined &&
+        longitude !== undefined &&
+        town !== undefined &&
+        barangay !== undefined
+      ) {
+        navigation.navigate("MapViewScreen", {
+          town,
+          barangay,
+          latitude,
+          longitude,
+        });
+      } else {
+        Alert.alert(
+          "Location Error",
+          "Location coordinates are not available."
+        );
+      }
+    } catch (error) {
+      console.error("Error navigating to MapViewScreen:", error);
+      Alert.alert("Navigation Error", "Unable to navigate to the map view.");
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -76,7 +269,9 @@ const ProfileScreen: React.FC = () => {
       {/* User Info */}
       <View style={styles.userInfoContainer}>
         <Text style={styles.userName}>{userName}</Text>
-        <Text style={styles.location}>{location}</Text>
+        <TouchableOpacity onPress={handleViewOnMap}>
+          <Text style={styles.location}>{location}</Text>
+        </TouchableOpacity>
         <Text style={styles.phoneNumber}>{phoneNumber}</Text>
       </View>
 
@@ -126,13 +321,14 @@ const styles = StyleSheet.create({
     fontFamily: "Montserrat_700Bold",
   },
   location: {
-    fontSize: RFValue(13),
+    fontSize: RFValue(14),
     color: "#888",
     fontFamily: "Montserrat_400Regular",
     marginTop: 4,
+    textDecorationLine: "underline",
   },
   phoneNumber: {
-    fontSize: RFValue(13),
+    fontSize: RFValue(14),
     color: "#888",
     fontFamily: "Montserrat_400Regular",
     marginTop: 2,
