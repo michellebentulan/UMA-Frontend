@@ -14,6 +14,8 @@ import MessageScreen from "../screens/message-screen/MessageScreen";
 import HomeScreen1 from "../screens/home-screen/homelayout";
 import SellLivestockScreen from "../screens/sell-livestock-screen/SellLivestockScreen";
 import BuyLivestockScreen from "../screens/buy-livestock-screen/BuyLivestockScreen";
+import MapViewScreen from "../components/MapViewScreen/MapViewScreen";
+import ProfileScreen from "../screens/profile-screen/ProfileScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>(); // Pass your types here
 
@@ -81,6 +83,16 @@ const AppNavigator = () => {
         <Stack.Screen
           name="BuyLivestock"
           component={BuyLivestockScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ProfileScreen"
+          component={ProfileScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="MapViewScreen"
+          component={MapViewScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
