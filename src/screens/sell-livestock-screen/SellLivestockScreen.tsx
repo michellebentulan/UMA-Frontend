@@ -18,6 +18,7 @@ import RNPickerSelect from "react-native-picker-select";
 import { RFValue } from "react-native-responsive-fontsize";
 import { RootStackParamList } from "../../navigation/type";
 import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
 
 interface ImageItem {
   uri: string;
@@ -72,7 +73,7 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
-      selectionLimit: 4 - images.length,
+      selectionLimit: 2 - images.length,
       quality: 1,
     });
 
@@ -91,6 +92,49 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
     setImages(images.filter((image) => image.id !== id));
   };
 
+  const analyzeImages = async () => {
+    if (images.length === 0) {
+      Alert.alert("No Images", "Please select images to analyze.");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      images.forEach((image, index) => {
+        formData.append("files", {
+          uri: image.uri,
+          type: "image/jpeg",
+          name: `livestock-${Date.now()}-${index}.jpg`,
+        } as any);
+      });
+
+      const response = await axios.post(
+        "http://192.168.187.149:3000/livestock/analyze-images",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      // Check if images were verified as livestock
+      const { validImages, invalidImages } = response.data;
+      if (invalidImages.length > 0) {
+        setImages(validImages); // Keep only valid images
+        Alert.alert(
+          "Invalid Images Removed",
+          "Some images were not recognized as livestock and were removed."
+        );
+      } else {
+        Alert.alert("Images Validated", "All images are valid livestock.");
+      }
+    } catch (error) {
+      console.error("Error analyzing images:", error);
+      Alert.alert("Error", "Failed to analyze images. Please try again.");
+    }
+  };
+
   const handlePriceSuggestion = () => {
     let pricePerKilo = 0;
     if (livestockType === "Pigs") pricePerKilo = 200;
@@ -107,6 +151,9 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
       Alert.alert("Validation Error", "Please fill in all required fields.");
       return;
     }
+
+    await analyzeImages();
+
     try {
       const listingData = {
         livestockType,
@@ -117,7 +164,7 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
         description,
       };
       await axios.post(
-        "http://192.168.137.29:3000/livestock/listing",
+        "http://192.168.187.149:3000/livestock/listing",
         listingData
       );
 
@@ -132,7 +179,7 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
         });
 
         await axios.post(
-          "http://192.168.137.29:3000/livestock/upload-images",
+          "http://192.168.187.149:3000/livestock/upload-images",
           formData,
           {
             headers: {
@@ -326,6 +373,9 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
 
       {/* Fixed Footer */}
       <View style={styles.footerContainer}>
+        <TouchableOpacity style={styles.postButton} onPress={analyzeImages}>
+          <Text style={styles.postButtonText}>Analyze Images</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.postButton} onPress={handleSaveListing}>
           <Text style={styles.postButtonText}>Post List</Text>
         </TouchableOpacity>
