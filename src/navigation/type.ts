@@ -15,7 +15,7 @@ export type RootStackParamList = {
   MessageScreen: undefined;
   ChatScreen: { user: Message };
   Home: undefined;
-  HomeScreen1: undefined;
+  HomeScreen1: { refreshRequestedListings?: boolean };
   SellLivestock: undefined;
   BuyLivestock: undefined;
   ProfileScreen: undefined;

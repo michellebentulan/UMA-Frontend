@@ -17,6 +17,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/type";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import LoadingScreen from "../../components/LoadingScreen/LoadingScreen";
 
 interface BuyLivestockScreenProps
   extends NativeStackScreenProps<RootStackParamList, "BuyLivestock"> {}
@@ -30,6 +31,7 @@ const BuyLivestockScreen: React.FC<BuyLivestockScreenProps> = ({
   const [price, setPrice] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [userId, setUserId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleBackPress = () => {
     Alert.alert(
@@ -73,6 +75,8 @@ const BuyLivestockScreen: React.FC<BuyLivestockScreenProps> = ({
       return;
     }
 
+    setIsLoading(true); // Show loading screen
+
     try {
       const listingData = {
         user_id: parseInt(userId, 10), // Ensure user_id is a number
@@ -90,18 +94,24 @@ const BuyLivestockScreen: React.FC<BuyLivestockScreenProps> = ({
         listingData
       );
 
+      setIsLoading(false);
+
       Alert.alert(
         "Success",
         "Livestock purchase listing created successfully!",
         [
           {
             text: "OK",
-            onPress: () => navigation.navigate("HomeScreen1"),
+            onPress: () =>
+              navigation.navigate("HomeScreen1", {
+                refreshRequestedListings: true,
+              }),
           },
         ]
       );
     } catch (error) {
-      console.error("Error creating listing:", error);
+      setIsLoading(false); // Hide loading screen
+      // console.error("Error creating listing:", error);
       Alert.alert("Error", "Failed to create the listing. Please try again.");
     }
   };
