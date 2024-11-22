@@ -15,6 +15,8 @@ import RNPickerSelect from "react-native-picker-select";
 import { RFValue } from "react-native-responsive-fontsize";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/type";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 interface BuyLivestockScreenProps
   extends NativeStackScreenProps<RootStackParamList, "BuyLivestock"> {}
@@ -27,6 +29,7 @@ const BuyLivestockScreen: React.FC<BuyLivestockScreenProps> = ({
   const [weight, setWeight] = useState<string>("");
   const [price, setPrice] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const [userId, setUserId] = useState<string | null>(null);
 
   const handleBackPress = () => {
     Alert.alert(
@@ -41,6 +44,17 @@ const BuyLivestockScreen: React.FC<BuyLivestockScreenProps> = ({
   };
 
   useEffect(() => {
+    const fetchUserId = async () => {
+      const storedUserId = await AsyncStorage.getItem("userId");
+      if (!storedUserId) {
+        Alert.alert("Error", "User ID not found. Please log in again.");
+        navigation.goBack();
+      }
+      setUserId(storedUserId);
+    };
+
+    fetchUserId();
+
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
       handleBackPress
@@ -48,19 +62,49 @@ const BuyLivestockScreen: React.FC<BuyLivestockScreenProps> = ({
     return () => backHandler.remove();
   }, []);
 
-  const handleSaveListing = () => {
+  const handleSaveListing = async () => {
     if (!livestockType || !weight || !price) {
       Alert.alert("Validation Error", "Please fill in all required fields.");
       return;
     }
-    Alert.alert("Success", "Livestock purchase listing created successfully!", [
-      {
-        text: "OK",
-        onPress: () => navigation.navigate("HomeScreen1"),
-      },
-    ]);
-  };
 
+    if (!userId) {
+      Alert.alert("Error", "User ID is missing. Please log in again.");
+      return;
+    }
+
+    try {
+      const listingData = {
+        user_id: parseInt(userId, 10), // Ensure user_id is a number
+        type: livestockType.toLowerCase(), // Enum values should match backend
+        quantity,
+        preferred_weight: parseFloat(weight), // Convert to number
+        preferred_price: parseFloat(price), // Convert to number
+        description,
+      };
+
+      console.log("Sending data to backend:", listingData);
+
+      await axios.post(
+        "http://192.168.109.149:3000/requested-listings",
+        listingData
+      );
+
+      Alert.alert(
+        "Success",
+        "Livestock purchase listing created successfully!",
+        [
+          {
+            text: "OK",
+            onPress: () => navigation.navigate("HomeScreen1"),
+          },
+        ]
+      );
+    } catch (error) {
+      console.error("Error creating listing:", error);
+      Alert.alert("Error", "Failed to create the listing. Please try again.");
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
@@ -86,11 +130,11 @@ const BuyLivestockScreen: React.FC<BuyLivestockScreenProps> = ({
           <RNPickerSelect
             onValueChange={(value) => setLivestockType(value)}
             items={[
-              { label: "Pigs", value: "Pigs" },
-              { label: "Cow", value: "Cow" },
-              { label: "Chicken", value: "Chicken" },
-              { label: "Goat", value: "Goat" },
-              { label: "Duck", value: "Duck" },
+              { label: "Pigs", value: "pig" },
+              { label: "Cow", value: "cow" },
+              { label: "Chicken", value: "chicken" },
+              { label: "Goat", value: "goat" },
+              { label: "Duck", value: "duck" },
             ]}
             value={livestockType}
             style={pickerSelectStyles}

@@ -48,7 +48,7 @@ const HomeScreen1: React.FC = () => {
         }
 
         const response = await axios.get(
-          `http://192.168.187.149:3000/users/${userId}`
+          `http://192.168.109.149:3000/users/${userId}`
         );
         const userData = response.data;
 
@@ -56,7 +56,7 @@ const HomeScreen1: React.FC = () => {
 
         if (userData.profile_image) {
           setProfileImageUrl(
-            `http://192.168.187.149:3000/uploads/profile-images/${userData.profile_image}`
+            `http://192.168.109.149:3000/uploads/profile-images/${userData.profile_image}`
           );
         } else {
           console.warn("Profile image not found in user data");
@@ -99,7 +99,7 @@ const HomeScreen1: React.FC = () => {
                 if (sessionToken) {
                   // Make API call to set the session to expire in 2 minutes
                   await axios.put(
-                    "http://192.168.187.149:3000/users/expire-session",
+                    "http://192.168.109.149:3000/users/expire-session",
                     {
                       sessionToken,
                     }
