@@ -24,6 +24,22 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, NavigationProp } from "@react-navigation/native"; // For navigation
 import { RootStackParamList } from "../../navigation/type";
+import LivestockCard from "../../components/RequestCard/RequestCard";
+
+interface RequestedListing {
+  id: number;
+  user: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    profile_image: string;
+  };
+  type: string;
+  preferred_price: number;
+  quantity: number;
+  description: string;
+  created_at: string;
+}
 
 const HomeScreen1: React.FC = () => {
   const [profileImageUrl, setProfileImageUrl] = useState("");
@@ -37,6 +53,28 @@ const HomeScreen1: React.FC = () => {
   const createListingTranslateY = useRef(new Animated.Value(0)).current;
   const [menuVisible, setMenuVisible] = useState(false);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>(); // Use typed navigation
+  const [requestedListings, setRequestedListings] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const checkForRefresh = async () => {
+        const params = navigation
+          .getState()
+          .routes.find((route) => route.name === "HomeScreen1")?.params as {
+          refreshRequestedListings?: boolean;
+        };
+
+        if (params?.refreshRequestedListings) {
+          await fetchRequestedListings();
+          navigation.setParams({ refreshRequestedListings: false }); // Reset the parameter
+        }
+      };
+
+      checkForRefresh();
+    }, [navigation])
+  );
 
   useEffect(() => {
     // Fetch user profile on component mount
@@ -46,6 +84,7 @@ const HomeScreen1: React.FC = () => {
         if (!userId) {
           throw new Error("User ID not found");
         }
+        setCurrentUserId(userId);
 
         const response = await axios.get(
           `http://192.168.109.149:3000/users/${userId}`
@@ -67,7 +106,49 @@ const HomeScreen1: React.FC = () => {
     };
 
     fetchUserProfile();
+    fetchRequestedListings();
   }, []);
+
+  const fetchRequestedListings = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(
+        "http://192.168.109.149:3000/requested-listings"
+      );
+
+      // Sort posts by creation date (newest first)
+      const sortedListings = response.data.sort(
+        (a: RequestedListing, b: RequestedListing) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+
+      setRequestedListings(sortedListings);
+    } catch (error) {
+      console.error("Failed to fetch requested listings:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const renderRequestCard = ({ item }: { item: RequestedListing }) => (
+    <LivestockCard
+      userImage={`http://192.168.109.149:3000/uploads/profile-images/${item.user.profile_image}`}
+      userName={`${item.user.first_name} ${item.user.last_name}`}
+      postDate={new Date(item.created_at).toLocaleDateString()}
+      description={item.description}
+      livestockType={item.type}
+      preferredPrice={item.preferred_price.toLocaleString()}
+      quantity={item.quantity}
+      postOwnerId={item.user.id.toString()} // Pass the post owner's ID
+      currentUserId={currentUserId || ""} // Pass the logged-in user's ID
+      onMessagePress={() =>
+        Alert.alert(
+          "Message",
+          `Message button pressed for ${item.user.first_name}`
+        )
+      }
+    />
+  );
 
   useFocusEffect(
     React.useCallback(() => {
@@ -133,6 +214,131 @@ const HomeScreen1: React.FC = () => {
       </Text>
     ));
   };
+  //   switch (activeScreen) {
+  //     case "Home":
+  //       return (
+  //         <>
+  //           {/* Search Bar Area */}
+  //           <View style={styles.searchBar}>
+  //             {/* Search input will go here */}
+  //             <SearchBar placeholder="Search Livestock" />
+  //           </View>
+
+  //           <View style={styles.tabButtons}>
+  //             <View style={styles.buttonContainer}>
+  //               <TouchableOpacity
+  //                 style={[
+  //                   styles.forSaleButton,
+  //                   activeTab === "ForSale" && styles.activeButton,
+  //                 ]}
+  //                 onPress={() => setActiveTab("ForSale")}
+  //               >
+  //                 <Text style={styles.buttonText}>For Sale</Text>
+  //               </TouchableOpacity>
+  //               <TouchableOpacity
+  //                 style={[
+  //                   styles.lookingForButton,
+  //                   activeTab === "LookingFor" && styles.activeButton,
+  //                 ]}
+  //                 onPress={() => setActiveTab("LookingFor")}
+  //               >
+  //                 <Text style={styles.buttonText}>Looking for</Text>
+  //               </TouchableOpacity>
+  //             </View>
+  //           </View>
+
+  //           <View style={styles.scrollableContent}>
+  //             <ScrollView
+  //               contentContainerStyle={styles.contentContainer}
+  //               onScroll={({ nativeEvent }) => {
+  //                 const currentOffset = nativeEvent.contentOffset.y;
+  //                 const isScrollingDown = currentOffset > lastScrollY.current;
+
+  //                 if (Math.abs(currentOffset - lastScrollY.current) > 10) {
+  //                   // Check if the scroll is significant
+  //                   if (isScrollingDown) {
+  //                     // Animate bottom nav hiding (slide down and fade out)
+  //                     Animated.parallel([
+  //                       Animated.timing(bottomNavOpacity, {
+  //                         toValue: 0,
+  //                         duration: 300,
+  //                         useNativeDriver: true,
+  //                       }),
+  //                       Animated.timing(bottomNavTranslateY, {
+  //                         toValue: 100,
+  //                         duration: 300,
+  //                         useNativeDriver: true,
+  //                       }),
+  //                       Animated.timing(createListingOpacity, {
+  //                         toValue: 0,
+  //                         duration: 300,
+  //                         useNativeDriver: true,
+  //                       }),
+  //                       Animated.timing(createListingTranslateY, {
+  //                         toValue: 100,
+  //                         duration: 300,
+  //                         useNativeDriver: true,
+  //                       }),
+  //                     ]).start();
+  //                   } else {
+  //                     // Animate bottom nav showing (slide up and fade in)
+  //                     Animated.parallel([
+  //                       Animated.timing(bottomNavOpacity, {
+  //                         toValue: 1,
+  //                         duration: 300,
+  //                         useNativeDriver: true,
+  //                       }),
+  //                       Animated.timing(bottomNavTranslateY, {
+  //                         toValue: 0,
+  //                         duration: 300,
+  //                         useNativeDriver: true,
+  //                       }),
+  //                       Animated.timing(createListingOpacity, {
+  //                         toValue: 1,
+  //                         duration: 300,
+  //                         useNativeDriver: true,
+  //                       }),
+  //                       Animated.timing(createListingTranslateY, {
+  //                         toValue: 0,
+  //                         duration: 300,
+  //                         useNativeDriver: true,
+  //                       }),
+  //                     ]).start();
+  //                   }
+  //                 }
+
+  //                 lastScrollY.current = currentOffset;
+  //               }}
+  //               scrollEventThrottle={16}
+  //             >
+  //               {generateDummyContent(30)}
+  //             </ScrollView>
+  //           </View>
+
+  //           {menuVisible && ( // Conditional rendering for the menu
+  //             <View style={styles.menu}>
+  //               <TouchableOpacity
+  //                 style={styles.menuItem}
+  //                 onPress={() => {
+  //                   setMenuVisible(false);
+  //                   navigation.navigate("SellLivestock"); // Navigate to Sell Livestock screen
+  //                 }}
+  //               >
+  //                 <Text style={styles.menuText}>Sell Livestock</Text>
+  //               </TouchableOpacity>
+  //               <TouchableOpacity
+  //                 style={styles.menuItem}
+  //                 onPress={() => {
+  //                   setMenuVisible(false);
+  //                   navigation.navigate("BuyLivestock"); // Navigate to Buy Livestock screen
+  //                 }}
+  //               >
+  //                 <Text style={styles.menuText}>Look for Livestock</Text>
+  //               </TouchableOpacity>
+  //             </View>
+  //           )}
+  //         </>
+  //       );
 
   const renderContent = () => {
     switch (activeScreen) {
@@ -141,10 +347,10 @@ const HomeScreen1: React.FC = () => {
           <>
             {/* Search Bar Area */}
             <View style={styles.searchBar}>
-              {/* Search input will go here */}
               <SearchBar placeholder="Search Livestock" />
             </View>
 
+            {/* Tab Buttons */}
             <View style={styles.tabButtons}>
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
@@ -168,75 +374,149 @@ const HomeScreen1: React.FC = () => {
               </View>
             </View>
 
+            {/* Content Area */}
             <View style={styles.scrollableContent}>
-              <ScrollView
-                contentContainerStyle={styles.contentContainer}
-                onScroll={({ nativeEvent }) => {
-                  const currentOffset = nativeEvent.contentOffset.y;
-                  const isScrollingDown = currentOffset > lastScrollY.current;
-
-                  if (Math.abs(currentOffset - lastScrollY.current) > 10) {
-                    // Check if the scroll is significant
-                    if (isScrollingDown) {
-                      // Animate bottom nav hiding (slide down and fade out)
-                      Animated.parallel([
-                        Animated.timing(bottomNavOpacity, {
-                          toValue: 0,
-                          duration: 300,
-                          useNativeDriver: true,
-                        }),
-                        Animated.timing(bottomNavTranslateY, {
-                          toValue: 100,
-                          duration: 300,
-                          useNativeDriver: true,
-                        }),
-                        Animated.timing(createListingOpacity, {
-                          toValue: 0,
-                          duration: 300,
-                          useNativeDriver: true,
-                        }),
-                        Animated.timing(createListingTranslateY, {
-                          toValue: 100,
-                          duration: 300,
-                          useNativeDriver: true,
-                        }),
-                      ]).start();
-                    } else {
-                      // Animate bottom nav showing (slide up and fade in)
-                      Animated.parallel([
-                        Animated.timing(bottomNavOpacity, {
-                          toValue: 1,
-                          duration: 300,
-                          useNativeDriver: true,
-                        }),
-                        Animated.timing(bottomNavTranslateY, {
-                          toValue: 0,
-                          duration: 300,
-                          useNativeDriver: true,
-                        }),
-                        Animated.timing(createListingOpacity, {
-                          toValue: 1,
-                          duration: 300,
-                          useNativeDriver: true,
-                        }),
-                        Animated.timing(createListingTranslateY, {
-                          toValue: 0,
-                          duration: 300,
-                          useNativeDriver: true,
-                        }),
-                      ]).start();
-                    }
+              {activeTab === "LookingFor" ? (
+                <FlatList
+                  data={requestedListings}
+                  keyExtractor={(item) => item.id.toString()}
+                  renderItem={renderRequestCard}
+                  contentContainerStyle={styles.requestCardContainer}
+                  ListEmptyComponent={() =>
+                    isLoading ? (
+                      <Text style={styles.emptyMessage}>Loading...</Text>
+                    ) : (
+                      <Text style={styles.emptyMessage}>
+                        No listings available.
+                      </Text>
+                    )
                   }
+                  onScroll={({ nativeEvent }) => {
+                    const currentOffset = nativeEvent.contentOffset.y;
+                    const isScrollingDown = currentOffset > lastScrollY.current;
 
-                  lastScrollY.current = currentOffset;
-                }}
-                scrollEventThrottle={16}
-              >
-                {generateDummyContent(30)}
-              </ScrollView>
+                    if (Math.abs(currentOffset - lastScrollY.current) > 10) {
+                      if (isScrollingDown) {
+                        Animated.parallel([
+                          Animated.timing(bottomNavOpacity, {
+                            toValue: 0,
+                            duration: 300,
+                            useNativeDriver: true,
+                          }),
+                          Animated.timing(bottomNavTranslateY, {
+                            toValue: 100,
+                            duration: 300,
+                            useNativeDriver: true,
+                          }),
+                          Animated.timing(createListingOpacity, {
+                            toValue: 0,
+                            duration: 300,
+                            useNativeDriver: true,
+                          }),
+                          Animated.timing(createListingTranslateY, {
+                            toValue: 100,
+                            duration: 300,
+                            useNativeDriver: true,
+                          }),
+                        ]).start();
+                      } else {
+                        Animated.parallel([
+                          Animated.timing(bottomNavOpacity, {
+                            toValue: 1,
+                            duration: 300,
+                            useNativeDriver: true,
+                          }),
+                          Animated.timing(bottomNavTranslateY, {
+                            toValue: 0,
+                            duration: 300,
+                            useNativeDriver: true,
+                          }),
+                          Animated.timing(createListingOpacity, {
+                            toValue: 1,
+                            duration: 300,
+                            useNativeDriver: true,
+                          }),
+                          Animated.timing(createListingTranslateY, {
+                            toValue: 0,
+                            duration: 300,
+                            useNativeDriver: true,
+                          }),
+                        ]).start();
+                      }
+                    }
+
+                    lastScrollY.current = currentOffset;
+                  }}
+                  scrollEventThrottle={16}
+                />
+              ) : (
+                <ScrollView
+                  contentContainerStyle={styles.contentContainer}
+                  onScroll={({ nativeEvent }) => {
+                    const currentOffset = nativeEvent.contentOffset.y;
+                    const isScrollingDown = currentOffset > lastScrollY.current;
+
+                    if (Math.abs(currentOffset - lastScrollY.current) > 10) {
+                      if (isScrollingDown) {
+                        Animated.parallel([
+                          Animated.timing(bottomNavOpacity, {
+                            toValue: 0,
+                            duration: 300,
+                            useNativeDriver: true,
+                          }),
+                          Animated.timing(bottomNavTranslateY, {
+                            toValue: 100,
+                            duration: 300,
+                            useNativeDriver: true,
+                          }),
+                          Animated.timing(createListingOpacity, {
+                            toValue: 0,
+                            duration: 300,
+                            useNativeDriver: true,
+                          }),
+                          Animated.timing(createListingTranslateY, {
+                            toValue: 100,
+                            duration: 300,
+                            useNativeDriver: true,
+                          }),
+                        ]).start();
+                      } else {
+                        Animated.parallel([
+                          Animated.timing(bottomNavOpacity, {
+                            toValue: 1,
+                            duration: 300,
+                            useNativeDriver: true,
+                          }),
+                          Animated.timing(bottomNavTranslateY, {
+                            toValue: 0,
+                            duration: 300,
+                            useNativeDriver: true,
+                          }),
+                          Animated.timing(createListingOpacity, {
+                            toValue: 1,
+                            duration: 300,
+                            useNativeDriver: true,
+                          }),
+                          Animated.timing(createListingTranslateY, {
+                            toValue: 0,
+                            duration: 300,
+                            useNativeDriver: true,
+                          }),
+                        ]).start();
+                      }
+                    }
+
+                    lastScrollY.current = currentOffset;
+                  }}
+                  scrollEventThrottle={16}
+                >
+                  {generateDummyContent(30)}
+                </ScrollView>
+              )}
             </View>
 
-            {menuVisible && ( // Conditional rendering for the menu
+            {/* Conditional Menu Rendering */}
+            {menuVisible && (
               <View style={styles.menu}>
                 <TouchableOpacity
                   style={styles.menuItem}
@@ -484,7 +764,7 @@ const styles = StyleSheet.create({
   },
   scrollableContent: {
     flex: 1,
-    backgroundColor: "#f1f3f5",
+    backgroundColor: "#fff",
     // Add additional styles for scrollable content
   },
   bottomNavigation: {
@@ -581,6 +861,17 @@ const styles = StyleSheet.create({
   menuText: {
     fontSize: 16,
     color: "#000",
+  },
+  emptyMessage: {
+    textAlign: "center",
+    marginTop: 20,
+    color: "gray",
+  },
+  requestCardContainer: {
+    flexGrow: 1, // Ensures scrolling works
+    justifyContent: "flex-start", // Aligns items to the top
+    alignItems: "stretch", // Makes the cards take full width
+    paddingHorizontal: 5, // Add consistent horizontal padding for spacing
   },
 });
 
