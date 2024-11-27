@@ -90,7 +90,7 @@ const BuyLivestockScreen: React.FC<BuyLivestockScreenProps> = ({
       console.log("Sending data to backend:", listingData);
 
       await axios.post(
-        "http://192.168.109.149:3000/requested-listings",
+        "http://192.168.58.149:3000/requested-listings",
         listingData
       );
 
@@ -117,6 +117,7 @@ const BuyLivestockScreen: React.FC<BuyLivestockScreenProps> = ({
   };
   return (
     <SafeAreaView style={styles.container}>
+      <LoadingScreen visible={isLoading} text="Processing your request..." />
       <View style={styles.headerContainer}>
         <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <Ionicons name="arrow-back" size={RFValue(20)} color="black" />

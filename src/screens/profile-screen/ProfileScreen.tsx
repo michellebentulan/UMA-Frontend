@@ -25,136 +25,6 @@ const ProfileScreen: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
-  //   useEffect(() => {
-  //     // Fetch user profile data from backend on component mount
-  //     const fetchUserProfile = async () => {
-  //       try {
-  //         const userId = await AsyncStorage.getItem("userId"); // Retrieve userId from AsyncStorage
-  //         if (!userId) {
-  //           throw new Error("User ID not found");
-  //         }
-
-  //         const response = await axios.get(
-  //           `http://192.168.187.149:3000/users/${userId}`
-  //         );
-  //         const userData = response.data;
-
-  //         // Update state with fetched data
-  //         if (userData) {
-  //           setUserName(`${userData.first_name} ${userData.last_name}`);
-  //           setPhoneNumber(userData.phone_number);
-  //           if (userData.profile_image) {
-  //             setProfileImageUrl(
-  //               `http://192.168.187.149:3000/uploads/profile-images/${userData.profile_image}`
-  //             );
-  //           }
-
-  //           // Fetch associated location data
-  //           if (userData.location) {
-  //             setLocation(
-  //               userData.location.barangay
-  //                 ? `${userData.location.barangay}, ${userData.location.town}`
-  //                 : "Location not set"
-  //             );
-  //             setLatitude(userData.location.latitude);
-  //             setLongitude(userData.location.longitude);
-  //             setTown(userData.location.town);
-  //             setBarangay(userData.location.barangay);
-  //           } else {
-  //             setLocation("Location not set");
-  //           }
-  //         }
-  //       } catch (error) {
-  //         console.error("Failed to fetch user profile:", error);
-  //         Alert.alert("Error", "Failed to fetch user profile. Please try again.");
-  //       }
-  //     };
-
-  //     fetchUserProfile();
-  //   }, []);
-
-  //   useEffect(() => {
-  //     // Fetch user profile data from backend on component mount
-  //     const fetchUserProfile = async () => {
-  //       try {
-  //         const userId = await AsyncStorage.getItem("userId"); // Retrieve userId from AsyncStorage
-  //         if (!userId) {
-  //           throw new Error("User ID not found");
-  //         }
-
-  //         // Fetch user profile
-  //         const response = await axios.get(
-  //           `http://192.168.187.149:3000/users/${userId}`
-  //         );
-  //         const userData = response.data;
-
-  //         // Update state with fetched data
-  //         if (userData) {
-  //           console.log("User Data:", userData);
-  //           setUserName(`${userData.first_name} ${userData.last_name}`);
-  //           setPhoneNumber(userData.phone_number);
-  //           if (userData.profile_image) {
-  //             setProfileImageUrl(
-  //               `http://192.168.187.149:3000/uploads/profile-images/${userData.profile_image}`
-  //             );
-  //           }
-
-  //           // Set town and barangay
-  //           setTown(userData.town);
-  //           setBarangay(userData.barangay);
-
-  //           // Fetch associated location data based on town and barangay
-  //           if (userData.town && userData.barangay) {
-  //             console.log(
-  //               "Fetching location for:",
-  //               userData.town,
-  //               userData.barangay
-  //             );
-  //             const locationResponse = await axios.get(
-  //               `http://192.168.187.149:3000/locations?town=${userData.town}&barangay=${userData.barangay}`
-  //             );
-  //             const locationData = locationResponse.data;
-
-  //             console.log("Location Data:", locationData);
-
-  //             if (locationData.length > 0) {
-  //               setLatitude(locationData[0].latitude);
-  //               setLongitude(locationData[0].longitude);
-  //               setLocation(`${userData.barangay}, ${userData.town}`);
-  //             } else {
-  //               setLocation("Location not set");
-  //             }
-  //           } else {
-  //             setLocation("Location not set");
-  //           }
-  //         }
-  //       } catch (error) {
-  //         console.error("Failed to fetch user profile:", error);
-  //         Alert.alert("Error", "Failed to fetch user profile. Please try again.");
-  //       }
-  //     };
-
-  //     fetchUserProfile();
-  //   }, []);
-
-  //   const handleViewOnMap = () => {
-  //     if (
-  //       latitude !== undefined &&
-  //       longitude !== undefined &&
-  //       town !== undefined &&
-  //       barangay !== undefined
-  //     ) {
-  //       navigation.navigate("MapViewScreen", {
-  //         town,
-  //         barangay,
-  //         latitude,
-  //         longitude,
-  //       });
-  //     } else {
-  //       Alert.alert("Location Error", "Location coordinates are not available.");
-  //     }
-  //   };
-
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -165,7 +35,7 @@ const ProfileScreen: React.FC = () => {
 
         // Fetch user profile
         const response = await axios.get(
-          `http://192.168.109.149:3000/users/${userId}`
+          `http://192.168.58.149:3000/users/${userId}`
         );
         const userData = response.data;
 
@@ -176,7 +46,7 @@ const ProfileScreen: React.FC = () => {
           setPhoneNumber(userData.phone_number);
           if (userData.profile_image) {
             setProfileImageUrl(
-              `http://192.168.109.149:3000/uploads/profile-images/${userData.profile_image}`
+              `http://192.168.58.149:3000/uploads/profile-images/${userData.profile_image}`
             );
           }
 
@@ -192,7 +62,7 @@ const ProfileScreen: React.FC = () => {
               userData.barangay
             );
             const locationResponse = await axios.get(
-              `http://192.168.109.149:3000/locations?town=${userData.town}&barangay=${userData.barangay}`
+              `http://192.168.58.149:3000/locations?town=${userData.town}&barangay=${userData.barangay}`
             );
             const locationData = locationResponse.data;
 

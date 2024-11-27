@@ -13,45 +13,75 @@ import { GiftedChat, IMessage } from "react-native-gifted-chat";
 import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../../navigation/type";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons"; // Use Ionicons from Expo
-import { Menu, MenuItem } from "react-native-material-menu"; // Optional for showing menu
-import * as ImagePicker from "expo-image-picker"; // For image picker
+import { Ionicons } from "@expo/vector-icons";
+import { Menu, MenuItem } from "react-native-material-menu";
+import * as ImagePicker from "expo-image-picker";
+import {
+  initializeSocket,
+  disconnectSocket,
+  getSocket,
+} from "../../utils/socketService";
 
 type ChatScreenProps = {
   route: RouteProp<RootStackParamList, "ChatScreen">;
 };
 
-type User = {
-  id: string;
-  name: string;
-  image: string;
-  phone: string; // Ensure phone is defined here
-};
-
 const ChatScreen = ({ route }: ChatScreenProps) => {
-  const { user } = route.params as { user: User };
+  const { user, conversationId } = route.params;
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const [visible, setVisible] = useState(false); // For report menu
-  const [inputText, setInputText] = useState(""); // Manage input text state
-  const [showChat, setShowChat] = useState(true); // Control visibility of chat
+  const [visible, setVisible] = useState(false);
+  const [inputText, setInputText] = useState("");
 
   useEffect(() => {
-    setMessages([
-      {
-        _id: 1,
-        text: "Hello! How can I help you?",
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: user.name,
-          avatar: user.image,
-        },
-      },
-    ]);
-  }, []);
+    const initializeChat = async () => {
+      const socket = await initializeSocket(); // Ensure socket is initialized
+
+      if (!socket) {
+        console.error("Socket connection failed.");
+        return;
+      }
+
+      // Join the conversation room
+      socket.emit("joinConversation", conversationId);
+
+      // Listen for new messages
+      socket.on("newMessage", (newMessage) => {
+        setMessages((previousMessages) =>
+          GiftedChat.append(previousMessages, [newMessage])
+        );
+      });
+
+      if (!socket) {
+        console.error("Socket instance not initialized.");
+        return;
+      }
+
+      return () => {
+        socket.emit("leaveConversation", { conversationId });
+        disconnectSocket();
+      };
+    };
+
+    initializeChat();
+  }, [conversationId]);
 
   const onSend = (newMessages: IMessage[] = []) => {
+    const socket = getSocket(); // Safely retrieve the socket instance
+    if (!socket) {
+      console.error("Socket is not connected.");
+      return;
+    }
+
+    // Emit new message through Socket.io
+    newMessages.forEach((message) => {
+      socket.emit("sendMessage", {
+        conversationId,
+        ...message, // Spread message directly, which already contains the user field
+      });
+    });
+
+    // Update the local message state
     setMessages((previousMessages) =>
       GiftedChat.append(previousMessages, newMessages)
     );
@@ -61,7 +91,7 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
   const closeMenu = () => setVisible(false);
 
   const handleCallUser = () => {
-    const phoneNumber = user.phone || "1234567890"; // Replace with the actual user's phone number
+    const phoneNumber = user.phone || "1234567890";
     Alert.alert(
       "Open Dialer",
       "You will be going to the phone app to call this number. Do you want to continue?",
@@ -86,7 +116,6 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
     );
   };
 
-  // Function to handle image picking using Expo Image Picker
   const selectImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -101,18 +130,29 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
         _id: Math.random().toString(),
         createdAt: new Date(),
         text: "",
-        image: selectedImage, // Image URI to display
+        image: selectedImage,
         user: {
-          _id: 1, // Your user ID
+          _id: 1,
         },
       };
+      const socket = getSocket(); // Safely retrieve the socket instance
+      if (!socket) {
+        console.error("Socket is not connected.");
+        return;
+      }
+      // Send image message via socket
+      socket.emit("sendMessage", {
+        conversationId,
+        ...imageMessage,
+      });
+
+      // Update local state
       setMessages((previousMessages) =>
         GiftedChat.append(previousMessages, [imageMessage])
       );
     }
   };
 
-  // Handle sending text message
   const handleSendMessage = () => {
     if (inputText.trim()) {
       const newMessage = {
@@ -120,7 +160,7 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
         text: inputText,
         createdAt: new Date(),
         user: {
-          _id: 1, // Your own user id
+          _id: 1,
         },
       };
       onSend([newMessage]);
@@ -145,7 +185,6 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
 
         {/* Phone Icon */}
         <TouchableOpacity onPress={handleCallUser} style={styles.callStyle}>
-          {/* <TouchableOpacity> */}
           <Ionicons name="call-outline" size={26} color="#333" />
         </TouchableOpacity>
 
@@ -175,35 +214,33 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
       </View>
 
       {/* Conditionally render the chat */}
-      {showChat && (
-        <GiftedChat
-          messages={messages}
-          onSend={(newMessages) => onSend(newMessages)}
-          user={{
-            _id: 1, // Your own user id
-          }}
-          renderInputToolbar={() => (
-            <View style={styles.inputContainer}>
-              <TouchableOpacity style={styles.iconButton} onPress={selectImage}>
-                <Ionicons name="image-outline" size={28} color="#888" />
-              </TouchableOpacity>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Type a message..."
-                placeholderTextColor="#aaa"
-                value={inputText}
-                onChangeText={setInputText}
-              />
-              <TouchableOpacity
-                style={styles.iconButton}
-                onPress={handleSendMessage}
-              >
-                <Ionicons name="send-outline" size={28} color="#007AFF" />
-              </TouchableOpacity>
-            </View>
-          )}
-        />
-      )}
+      <GiftedChat
+        messages={messages}
+        onSend={(newMessages) => onSend(newMessages)}
+        user={{
+          _id: 1,
+        }}
+        renderInputToolbar={() => (
+          <View style={styles.inputContainer}>
+            <TouchableOpacity style={styles.iconButton} onPress={selectImage}>
+              <Ionicons name="image-outline" size={28} color="#888" />
+            </TouchableOpacity>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Type a message..."
+              placeholderTextColor="#aaa"
+              value={inputText}
+              onChangeText={setInputText}
+            />
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={handleSendMessage}
+            >
+              <Ionicons name="send-outline" size={28} color="#007AFF" />
+            </TouchableOpacity>
+          </View>
+        )}
+      />
     </View>
   );
 };
@@ -226,7 +263,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    marginLeft: 10, // Adjust margin for spacing
+    marginLeft: 10,
   },
   userName: {
     flex: 1,

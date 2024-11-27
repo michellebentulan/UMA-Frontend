@@ -87,7 +87,7 @@ const HomeScreen1: React.FC = () => {
         setCurrentUserId(userId);
 
         const response = await axios.get(
-          `http://192.168.109.149:3000/users/${userId}`
+          `http://192.168.58.149:3000/users/${userId}`
         );
         const userData = response.data;
 
@@ -95,7 +95,7 @@ const HomeScreen1: React.FC = () => {
 
         if (userData.profile_image) {
           setProfileImageUrl(
-            `http://192.168.109.149:3000/uploads/profile-images/${userData.profile_image}`
+            `http://192.168.58.149:3000/uploads/profile-images/${userData.profile_image}`
           );
         } else {
           console.warn("Profile image not found in user data");
@@ -113,7 +113,7 @@ const HomeScreen1: React.FC = () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        "http://192.168.109.149:3000/requested-listings"
+        "http://192.168.58.149:3000/requested-listings"
       );
 
       // Sort posts by creation date (newest first)
@@ -130,9 +130,49 @@ const HomeScreen1: React.FC = () => {
     }
   };
 
+  const handlePressMessage = async (
+    postOwnerId: number,
+    userName: string,
+    userImage: string
+  ) => {
+    try {
+      // Retrieve the current user's ID from AsyncStorage
+      const currentUserId = await AsyncStorage.getItem("userId");
+      if (!currentUserId) {
+        throw new Error("User ID not found");
+      }
+
+      // Convert currentUserId to a number
+      const currentUserIdNum = parseInt(currentUserId);
+
+      // Call backend to create or fetch the conversation
+      const response = await axios.post(
+        "http://192.168.58.149:3000/conversations",
+        {
+          userIds: [currentUserIdNum, postOwnerId],
+        }
+      );
+
+      const { id: conversationId } = response.data;
+
+      // Navigate to the ChatScreen
+      navigation.navigate("ChatScreen", {
+        conversationId,
+        user: {
+          id: postOwnerId,
+          name: userName,
+          image: userImage,
+        },
+      });
+    } catch (error) {
+      console.error("Error creating or fetching conversation:", error);
+      Alert.alert("Error", "Failed to start a conversation. Please try again.");
+    }
+  };
+
   const renderRequestCard = ({ item }: { item: RequestedListing }) => (
     <LivestockCard
-      userImage={`http://192.168.109.149:3000/uploads/profile-images/${item.user.profile_image}`}
+      userImage={`http://192.168.58.149:3000/uploads/profile-images/${item.user.profile_image}`}
       userName={`${item.user.first_name} ${item.user.last_name}`}
       postDate={new Date(item.created_at).toLocaleDateString()}
       description={item.description}
@@ -142,9 +182,10 @@ const HomeScreen1: React.FC = () => {
       postOwnerId={item.user.id.toString()} // Pass the post owner's ID
       currentUserId={currentUserId || ""} // Pass the logged-in user's ID
       onMessagePress={() =>
-        Alert.alert(
-          "Message",
-          `Message button pressed for ${item.user.first_name}`
+        handlePressMessage(
+          item.user.id,
+          `${item.user.first_name} ${item.user.last_name}`,
+          `http://192.168.58.149:3000/uploads/profile-images/${item.user.profile_image}`
         )
       }
     />
@@ -180,7 +221,7 @@ const HomeScreen1: React.FC = () => {
                 if (sessionToken) {
                   // Make API call to set the session to expire in 2 minutes
                   await axios.put(
-                    "http://192.168.109.149:3000/users/expire-session",
+                    "http://192.168.58.149:3000/users/expire-session",
                     {
                       sessionToken,
                     }
