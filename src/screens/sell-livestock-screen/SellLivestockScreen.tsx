@@ -17,8 +17,10 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import RNPickerSelect from "react-native-picker-select";
 import { RFValue } from "react-native-responsive-fontsize";
 import { RootStackParamList } from "../../navigation/type";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { v4 as uuidv4 } from "uuid";
+import * as FileSystem from "expo-file-system";
+import LoadingScreen from "../../components/LoadingScreen/LoadingScreen";
 
 interface ImageItem {
   uri: string;
@@ -41,6 +43,8 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
   const [isNegotiable, setIsNegotiable] = useState<boolean>(false);
   const [description, setDescription] = useState<string>("");
   const [suggestedPrice, setSuggestedPrice] = useState<number | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleBackPress = () => {
     Alert.alert(
@@ -55,12 +59,23 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
   };
 
   useEffect(() => {
+    const fetchUserId = async () => {
+      const storedUserId = await AsyncStorage.getItem("userId");
+      if (!storedUserId) {
+        Alert.alert("Error", "User ID not found. Please log in again.");
+        navigation.goBack();
+      }
+      setUserId(storedUserId);
+    };
+
+    fetchUserId();
+
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
       handleBackPress
     );
     return () => backHandler.remove();
-  }, []);
+  }, [navigation]);
 
   const handleAddPhoto = async () => {
     const permissionResult =
@@ -73,7 +88,7 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
-      selectionLimit: 2 - images.length,
+      selectionLimit: 4 - images.length,
       quality: 1,
     });
 
@@ -92,14 +107,51 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
     setImages(images.filter((image) => image.id !== id));
   };
 
-  const analyzeImages = async () => {
-    if (images.length === 0) {
-      Alert.alert("No Images", "Please select images to analyze.");
+  const handlePriceSuggestion = async () => {
+    if (!livestockType || !weight) {
+      Alert.alert("Error", "Please select livestock type and enter weight.");
       return;
     }
 
     try {
+      const response = await axios.get(
+        `http://192.168.58.149:3000/price-suggestions/search`,
+        {
+          params: { livestock_type: livestockType },
+        }
+      );
+      const pricePerKg = response.data.price_per_kg;
+      const suggested =
+        pricePerKg && weight ? parseFloat(weight) * pricePerKg * quantity : 0;
+      setSuggestedPrice(suggested);
+      setPrice(suggested.toString());
+    } catch (error) {
+      console.error("Error fetching price suggestion:", error);
+      Alert.alert("Error", "Unable to fetch price suggestion.");
+    }
+  };
+
+  const handleSaveListing = async () => {
+    if (!livestockType || !weight || !price || images.length === 0) {
+      Alert.alert(
+        "Validation Error",
+        "Please fill in all required fields and attach at least one image."
+      );
+      return;
+    }
+
+    if (!userId) {
+      Alert.alert("Error", "User ID is missing. Please log in again.");
+      return;
+    }
+
+    try {
+      setLoading(true); // Show loading screen
+
+      // Prepare formData for image analysis
+      console.log("Valid Images for Submission:", images);
       const formData = new FormData();
+
       images.forEach((image, index) => {
         formData.append("files", {
           uri: image.uri,
@@ -108,8 +160,20 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
         } as any);
       });
 
-      const response = await axios.post(
-        "http://192.168.187.149:3000/livestock/analyze-images",
+      formData.append("user_id", userId.toString());
+      formData.append("type", livestockType.toLowerCase());
+      formData.append("quantity", quantity.toString());
+      formData.append("weight_per_kg", weight.toString());
+      formData.append("price", price.toString());
+      formData.append("negotiable", isNegotiable ? "true" : "false");
+      formData.append("description", description);
+      formData.append("livestockType", livestockType.toLowerCase());
+
+      console.log("Analyzing images...");
+      console.log("Livestock Type:", livestockType);
+
+      const analyzeResponse = await axios.post(
+        "http://192.168.58.149:3000/livestock/analyze-images",
         formData,
         {
           headers: {
@@ -118,91 +182,90 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
         }
       );
 
-      // Check if images were verified as livestock
-      const { validImages, invalidImages } = response.data;
+      console.log("Image Analysis Response:", analyzeResponse.data);
+      const { validImages, invalidImages } = analyzeResponse.data;
+
       if (invalidImages.length > 0) {
-        setImages(validImages); // Keep only valid images
+        setLoading(false);
         Alert.alert(
-          "Invalid Images Removed",
-          "Some images were not recognized as livestock and were removed."
+          "Image Validation Failed",
+          `Some images are not recognized as ${livestockType}. Please attach valid images.`,
+          [
+            {
+              text: "OK",
+              onPress: () => setImages(validImages),
+            },
+          ]
         );
-      } else {
-        Alert.alert("Images Validated", "All images are valid livestock.");
+        return;
       }
-    } catch (error) {
-      console.error("Error analyzing images:", error);
-      Alert.alert("Error", "Failed to analyze images. Please try again.");
-    }
-  };
 
-  const handlePriceSuggestion = () => {
-    let pricePerKilo = 0;
-    if (livestockType === "Pigs") pricePerKilo = 200;
-    else if (livestockType === "Cow") pricePerKilo = 800;
-    else if (livestockType === "Chicken") pricePerKilo = 100;
+      console.log("Image validation passed, preparing listing data...");
 
-    const suggested = weight ? parseFloat(weight) * pricePerKilo * quantity : 0;
-    setSuggestedPrice(suggested);
-    setPrice(suggested.toString());
-  };
+      // Combine listing data with original valid image URIs
+      const listingFormData = new FormData();
 
-  const handleSaveListing = async () => {
-    if (!livestockType || !weight || !price) {
-      Alert.alert("Validation Error", "Please fill in all required fields.");
-      return;
-    }
+      images.forEach((image, index) => {
+        // Use the original local URI of the image
+        listingFormData.append("files", {
+          uri: image.uri,
+          type: "image/jpeg",
+          name: `livestock-${Date.now()}-${index}.jpg`,
+        } as any);
+      });
 
-    await analyzeImages();
+      listingFormData.append("user_id", userId.toString());
+      listingFormData.append("type", livestockType.toLowerCase());
+      listingFormData.append("quantity", quantity.toString());
+      listingFormData.append("weight_per_kg", weight.toString());
+      listingFormData.append("price", price.toString());
+      listingFormData.append("negotiable", isNegotiable ? "true" : "false");
+      listingFormData.append("description", description);
 
-    try {
-      const listingData = {
-        livestockType,
-        quantity,
-        weight,
-        price,
-        isNegotiable,
-        description,
-      };
-      await axios.post(
-        "http://192.168.187.149:3000/livestock/listing",
-        listingData
+      console.log("Submitting listing...");
+      const listingResponse = await axios.post(
+        "http://192.168.58.149:3000/livestock-listings",
+        listingFormData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
 
-      if (images.length > 0) {
-        const formData = new FormData();
-        images.forEach((image, index) => {
-          formData.append("files", {
-            uri: image.uri,
-            type: "image/jpeg",
-            name: `livestock-${Date.now()}-${index}.jpg`,
-          } as any);
-        });
-
-        await axios.post(
-          "http://192.168.187.149:3000/livestock/upload-images",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-      }
+      console.log("Listing created successfully:", listingResponse.data);
+      setLoading(false);
 
       Alert.alert("Success", "Livestock listing created successfully!", [
         {
           text: "OK",
-          onPress: () => navigation.navigate("HomeScreen1"),
+          onPress: () =>
+            navigation.navigate("HomeScreen1", {
+              refreshRequestedListings: true,
+            }),
         },
       ]);
-    } catch (error) {
-      console.error("Error creating listing:", error);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        setLoading(false);
+        if (error.response) {
+          console.error("Error Response:", error.response.data);
+        } else if (error.request) {
+          console.error("Error Request:", error.request);
+        } else {
+          console.error("Error Message:", error.message);
+        }
+      } else {
+        console.error("Unexpected Error:", error);
+      }
+
       Alert.alert("Error", "Failed to create the listing. Please try again.");
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
+      <LoadingScreen visible={loading} text="Processing..." />
       <View style={styles.headerContainer}>
         <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <Ionicons name="arrow-back" size={RFValue(20)} color="black" />
@@ -235,7 +298,7 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
                     </TouchableOpacity>
                   </View>
                 ))}
-                {images.length < 4 && (
+                {images.length < 3 && (
                   <TouchableOpacity
                     style={styles.addPhotoButton}
                     onPress={handleAddPhoto}
@@ -246,7 +309,7 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
                 )}
               </ScrollView>
               <Text style={styles.photoCount}>
-                {`${images.length}/4 Photos Added`}
+                {`${images.length}/3 Photos Added`}
               </Text>
             </View>
           )}
@@ -256,11 +319,11 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
           <RNPickerSelect
             onValueChange={(value) => setLivestockType(value)}
             items={[
-              { label: "Pigs", value: "Pigs" },
-              { label: "Cow", value: "Cow" },
-              { label: "Chicken", value: "Chicken" },
-              { label: "Goat", value: "Goat" },
-              { label: "Duck", value: "Duck" },
+              { label: "Pig", value: "pig" },
+              { label: "Cow", value: "cow" },
+              { label: "Chicken", value: "chicken" },
+              { label: "Goat", value: "goat" },
+              { label: "Duck", value: "duck" },
             ]}
             value={livestockType}
             style={pickerSelectStyles}
@@ -336,9 +399,6 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
           </TouchableOpacity>
         </View>
 
-        {/* <TouchableOpacity onPress={handlePriceSuggestion}>
-          <Text style={styles.priceSuggestion}>Get Price Suggestion</Text>
-        </TouchableOpacity> */}
         <View style={styles.row}>
           <TouchableOpacity onPress={handlePriceSuggestion}>
             <Text style={styles.priceSuggestion}>Get Price Suggestion</Text>
@@ -373,9 +433,6 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
 
       {/* Fixed Footer */}
       <View style={styles.footerContainer}>
-        <TouchableOpacity style={styles.postButton} onPress={analyzeImages}>
-          <Text style={styles.postButtonText}>Analyze Images</Text>
-        </TouchableOpacity>
         <TouchableOpacity style={styles.postButton} onPress={handleSaveListing}>
           <Text style={styles.postButtonText}>Post List</Text>
         </TouchableOpacity>

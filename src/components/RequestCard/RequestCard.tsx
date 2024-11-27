@@ -1,7 +1,18 @@
 import React from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 import { Ionicons } from "@expo/vector-icons";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation, NavigationProp } from "@react-navigation/native";
+import { RootStackParamList } from "../../navigation/type";
 
 interface LivestockCardProps {
   userImage: string; // URL of the user's profile image
@@ -28,6 +39,8 @@ const LivestockCard: React.FC<LivestockCardProps> = ({
   postOwnerId,
   currentUserId,
 }) => {
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
   const capitalizeFirstLetter = (text: string) => {
     return text.charAt(0).toUpperCase() + text.slice(1);
   };
@@ -69,7 +82,10 @@ const LivestockCard: React.FC<LivestockCardProps> = ({
 
       {/* Message Button - Only show if the current user is not the post owner */}
       {currentUserId !== postOwnerId && (
-        <TouchableOpacity style={styles.messageButton} onPress={onMessagePress}>
+        <TouchableOpacity
+          style={styles.messageButton}
+          onPress={onMessagePress} // Use the passed onMessagePress prop
+        >
           <Text style={styles.messageButtonText}>Message</Text>
         </TouchableOpacity>
       )}

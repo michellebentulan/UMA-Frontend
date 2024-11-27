@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -12,10 +12,16 @@ import {
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { RootStackParamList } from "../../navigation/type";
 import Lonely from "../../../assets/svg-images/lonely.svg";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import socket, {
+  initializeSocket,
+  disconnectSocket,
+} from "../../utils/socketService";
 
 // Define the Message type
 type Message = {
-  id: string;
+  id: number;
   name: string;
   message: string;
   time: string;
@@ -24,153 +30,47 @@ type Message = {
   isUnread: boolean;
 };
 
-// Sample messages data
-const messages: Message[] = [
-  {
-    id: "1",
-    name: "Mark Ian Labuca",
-    message: "Yes. The price is still negotiable...",
-    time: "1h",
-    image: "https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg",
-    phone: "+6369634491842",
-    isUnread: true,
-  },
-  {
-    id: "2",
-    name: "Mae Fatima Aladad",
-    message: "Thank you!",
-    time: "15m",
-    image: "https://example.com/image1.jpg",
-    phone: "09100056575",
-    isUnread: true,
-  },
-  {
-    id: "3",
-    name: "Nico Bentulan",
-    message: "Available pa ang baka?",
-    time: "2h",
-    image: "https://example.com/image3.jpg",
-    phone: "+6369634491842",
-    isUnread: true,
-  },
-  {
-    id: "4",
-    name: "Mark Ian Labuca",
-    message: "Yes. The price is still negotiable...",
-    time: "1h",
-    image: "https://example.com/image1.jpg",
-    phone: "+6369634491842",
-    isUnread: false,
-  },
-  {
-    id: "5",
-    name: "Mark Ian Labuca",
-    message: "Yes. The price is still negotiable...",
-    time: "1h",
-    image: "https://example.com/image1.jpg",
-    phone: "+6369634491842",
-    isUnread: false,
-  },
-  {
-    id: "6",
-    name: "Mark Ian Labuca",
-    message: "Yes. The price is still negotiable...",
-    time: "1h",
-    image: "https://example.com/image1.jpg",
-    phone: "+6369634491842",
-    isUnread: false,
-  },
-  {
-    id: "7",
-    name: "Mark Ian Labuca",
-    message: "Yes. The price is still negotiable...",
-    time: "1h",
-    image: "https://example.com/image1.jpg",
-    phone: "+6369634491842",
-    isUnread: true,
-  },
-  {
-    id: "8",
-    name: "Mark Ian Labuca",
-    message: "Yes. The price is still negotiable...",
-    time: "1h",
-    image: "https://example.com/image1.jpg",
-    phone: "+6369634491842",
-    isUnread: true,
-  },
-  {
-    id: "9",
-    name: "Mark Ian Labuca",
-    message: "Yes. The price is still negotiable...",
-    time: "1h",
-    image: "https://example.com/image1.jpg",
-    phone: "+6369634491842",
-    isUnread: true,
-  },
-  {
-    id: "10",
-    name: "Mark Ian Labuca",
-    message: "Yes. The price is still negotiable...",
-    time: "1h",
-    image: "https://example.com/image1.jpg",
-    phone: "+6369634491842",
-    isUnread: true,
-  },
-  {
-    id: "11",
-    name: "Mark Ian Labuca",
-    message: "Yes. The price is still negotiable...",
-    time: "1h",
-    image: "https://example.com/image1.jpg",
-    phone: "+6369634491842",
-    isUnread: false,
-  },
-  {
-    id: "12",
-    name: "Mark Ian Labuca",
-    message: "Yes. The price is still negotiable...",
-    time: "1h",
-    image: "https://example.com/image1.jpg",
-    phone: "+6369634491842",
-    isUnread: false,
-  },
-  {
-    id: "13",
-    name: "Mark Ian Labuca",
-    message: "Yes. The price is still negotiable...",
-    time: "1h",
-    image: "https://example.com/image1.jpg",
-    phone: "+6369634491842",
-    isUnread: true,
-  },
-  {
-    id: "14",
-    name: "Mark Ian Labuca",
-    message: "Yes. The price is still negotiable...",
-    time: "1h",
-    image: "https://example.com/image1.jpg",
-    phone: "+6369634491842",
-    isUnread: true,
-  },
-  {
-    id: "15",
-    name: "Mark Ian Labuca",
-    message: "Yes. The price is still negotiable...",
-    time: "1h",
-    image: "https://example.com/image1.jpg",
-    phone: "+6369634491842",
-    isUnread: true,
-  },
-];
-
-// Sample messages data (set to empty array for testing)
-// const messages: Message[] = [];
-
 const MessageScreen = ({ bottomNavOpacity, bottomNavTranslateY }: any) => {
+  const [messages, setMessages] = useState<Message[]>([]);
   const [searchText, setSearchText] = useState<string>("");
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>(); // Correctly typed useNavigation
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const scrollY = useRef(new Animated.Value(0)).current;
   const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const fetchConversations = async () => {
+      try {
+        const userId = await AsyncStorage.getItem("userId");
+        const sessionToken = await AsyncStorage.getItem("sessionToken");
+
+        if (!userId || !sessionToken) {
+          throw new Error("User ID or Session Token not found");
+        }
+
+        console.log("Session Token used for authorization:", sessionToken);
+
+        await initializeSocket(); // Initialize the socket
+
+        const response = await axios.get(
+          "http://192.168.58.149:3000/conversations",
+          {
+            headers: {
+              Authorization: `Bearer ${sessionToken}`, // Use the session token obtained from login
+            },
+          }
+        );
+        setMessages(response.data);
+      } catch (error) {
+        console.error("Error fetching conversations:", error);
+      }
+    };
+
+    fetchConversations();
+
+    return () => {
+      disconnectSocket();
+    };
+  }, []);
 
   const handleScroll = ({ nativeEvent }: any) => {
     const currentOffset = nativeEvent.contentOffset.y;
@@ -178,7 +78,6 @@ const MessageScreen = ({ bottomNavOpacity, bottomNavTranslateY }: any) => {
 
     if (Math.abs(currentOffset - lastScrollY.current) > 10) {
       if (isScrollingDown) {
-        // Hide bottom navigation
         Animated.parallel([
           Animated.timing(bottomNavOpacity, {
             toValue: 0,
@@ -192,7 +91,6 @@ const MessageScreen = ({ bottomNavOpacity, bottomNavTranslateY }: any) => {
           }),
         ]).start();
       } else {
-        // Show bottom navigation
         Animated.parallel([
           Animated.timing(bottomNavOpacity, {
             toValue: 1,
@@ -211,13 +109,25 @@ const MessageScreen = ({ bottomNavOpacity, bottomNavTranslateY }: any) => {
     lastScrollY.current = currentOffset;
   };
 
+  // Filter messages based on search text
+  const filteredMessages = messages.filter((message) =>
+    message.name.toLowerCase().includes(searchText.toLowerCase())
+  );
+
   const renderMessageItem = ({ item }: { item: Message }) => (
     <TouchableOpacity
-      style={[
-        styles.messageItem,
-        // item.isUnread && styles.unreadMessageItem,
-      ]}
-      onPress={() => navigation.navigate("ChatScreen", { user: item })} // Pass the user to ChatScreen
+      style={styles.messageItem}
+      onPress={() =>
+        navigation.navigate("ChatScreen", {
+          user: {
+            id: item.id,
+            name: item.name,
+            image: item.image,
+            phone: item.phone,
+          },
+          conversationId: item.id, // Pass `id` as number
+        })
+      }
     >
       <Image source={{ uri: item.image }} style={styles.avatar} />
       <View style={styles.messageContent}>
@@ -230,7 +140,6 @@ const MessageScreen = ({ bottomNavOpacity, bottomNavTranslateY }: any) => {
 
   return (
     <View style={styles.container}>
-      {/* <Text style={styles.header}>Check Messages</Text> */}
       <View style={styles.searchContainer}>
         <TextInput
           placeholder="Search Message"
@@ -240,8 +149,8 @@ const MessageScreen = ({ bottomNavOpacity, bottomNavTranslateY }: any) => {
         />
       </View>
       <FlatList
-        data={messages}
-        keyExtractor={(item) => item.id}
+        data={filteredMessages}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={renderMessageItem}
         ListEmptyComponent={() => (
           <View style={styles.emptyContainer}>
@@ -249,7 +158,7 @@ const MessageScreen = ({ bottomNavOpacity, bottomNavTranslateY }: any) => {
             <Text style={styles.emptyText}>It's lonely in here...</Text>
           </View>
         )}
-        contentContainerStyle={{ flexGrow: 1 }} // Ensures FlatList can scroll even with less content
+        contentContainerStyle={{ flexGrow: 1 }}
         style={styles.messageList}
         onScroll={handleScroll}
         scrollEventThrottle={16}
@@ -263,15 +172,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     padding: 20,
-    marginTop: 1,
   },
   messageList: {
-    flex: 1, // Ensures FlatList takes up remaining space
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 50,
+    flex: 1,
   },
   searchContainer: {
     flexDirection: "row",
@@ -285,7 +188,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 8,
     fontSize: 16,
-    fontFamily: "Montserrat_400Regular",
   },
   messageItem: {
     flexDirection: "row",
@@ -311,9 +213,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#888",
   },
+  metaContainer: {
+    alignItems: "flex-end",
+  },
   time: {
     fontSize: 12,
     color: "#888",
+  },
+  unreadBadge: {
+    backgroundColor: "#FF3B30",
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginTop: 5,
+    alignSelf: "flex-end",
+  },
+  unreadBadgeText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
   },
   emptyContainer: {
     alignItems: "center",
@@ -323,7 +241,6 @@ const styles = StyleSheet.create({
     marginTop: -40,
     fontSize: 18,
     color: "#888",
-    fontFamily: "Montserrat_400Regular",
   },
 });
 
