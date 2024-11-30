@@ -83,6 +83,11 @@ const CompleteProfileScreen: React.FC<CompleteProfileScreenProps> = ({
   };
 
   const validateInputs = () => {
+    if (!profileImage) {
+      Alert.alert("Validation Error", "Please select a profile image.");
+      return false;
+    }
+
     if (!birthDate) {
       Alert.alert("Validation Error", "Please select your birthdate.");
       return false;
@@ -150,7 +155,10 @@ const CompleteProfileScreen: React.FC<CompleteProfileScreenProps> = ({
       Alert.alert("Success", "Profile updated successfully!", [
         {
           text: "OK",
-          onPress: () => navigation.navigate("HomeScreen1"),
+          onPress: () =>
+            navigation.navigate("HomeScreen1", {
+              refreshRequestedListings: true,
+            }),
         },
       ]);
     } catch (error) {

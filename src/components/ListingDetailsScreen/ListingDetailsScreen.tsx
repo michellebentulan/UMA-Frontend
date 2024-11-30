@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   SafeAreaView,
   ScrollView,
   Alert,
+  Animated,
+  FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { RFValue } from "react-native-responsive-fontsize";
@@ -29,6 +31,7 @@ const ListingDetailsScreen: React.FC<ListingDetailsScreenProps> = ({
   const [listing, setListing] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [location, setLocation] = useState<any>(null);
+  const scrollX = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const fetchListingDetails = async () => {
@@ -109,25 +112,57 @@ const ListingDetailsScreen: React.FC<ListingDetailsScreenProps> = ({
           </View>
         </View>
 
-        {/* Listing Image */}
-        {listing.images.length > 0 ? (
-          <Image
-            source={{
-              uri: listing.images[0].startsWith("http")
-                ? listing.images[0]
-                : `http://192.168.29.149:3000/${listing.images[0]}`,
-            }}
-            style={styles.listingImage}
-            onError={() =>
-              console.error(
-                "Failed to load listing image:",
-                `http://192.168.29.149:3000/${listing.images[0]}`
-              )
-            }
+        {/* Livestock Images with Swipe Functionality and Paging Dots */}
+        <View>
+          <FlatList
+            data={listing.images}
+            keyExtractor={(item: string, index: number) => `${item}-${index}`}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            pagingEnabled
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+              { useNativeDriver: false }
+            )}
+            renderItem={({ item }: { item: string }) => (
+              <Image
+                source={{
+                  uri: item.startsWith("http")
+                    ? item
+                    : `http://192.168.29.149:3000/${item}`,
+                }}
+                style={styles.listingImage}
+                onError={() =>
+                  console.error(
+                    "Failed to load listing image:",
+                    `http://192.168.29.149:3000/${item}`
+                  )
+                }
+              />
+            )}
           />
-        ) : (
-          <Text>No Image Available</Text>
-        )}
+          {/* Dots Indicator */}
+          <View style={styles.dotsContainer}>
+            {listing.images.map((_: string, index: number) => {
+              const inputRange = [
+                (index - 1) * RFValue(350),
+                index * RFValue(350),
+                (index + 1) * RFValue(350),
+              ];
+              const dotOpacity = scrollX.interpolate({
+                inputRange,
+                outputRange: [0.3, 1, 0.3],
+                extrapolate: "clamp",
+              });
+              return (
+                <Animated.View
+                  key={index}
+                  style={[styles.dot, { opacity: dotOpacity }]}
+                />
+              );
+            })}
+          </View>
+        </View>
 
         {/* Description */}
         <View style={styles.descriptionContainer}>
@@ -217,7 +252,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f8f8",
-    paddingHorizontal: 16,
+    paddingHorizontal: 10,
     paddingTop: 20,
   },
   closeButton: {
@@ -248,29 +283,37 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: RFValue(16),
-    fontWeight: "bold",
+    fontFamily: "Montserrat_400Regular",
     color: "#333",
   },
   postDate: {
     fontSize: RFValue(12),
+    fontFamily: "Montserrat_400Regular",
     color: "gray",
   },
   listingImage: {
-    width: RFValue(350), // Set a fixed width
-    height: RFValue(190),
+    width: RFValue(315), // Set a fixed width
+    height: RFValue(210),
     borderRadius: 10,
     marginBottom: 20,
+  },
+  noImageText: {
+    fontSize: RFValue(14),
+    fontFamily: "Montserrat_400Regular",
+    textAlign: "center",
+    color: "#888",
   },
   descriptionContainer: {
     paddingVertical: 16,
   },
   descriptionHeader: {
-    fontSize: RFValue(18),
-    fontWeight: "bold",
+    fontSize: RFValue(15),
+    fontFamily: "Montserrat_400Regular",
     marginBottom: 8,
   },
   descriptionText: {
-    fontSize: RFValue(14),
+    fontSize: RFValue(13),
+    fontFamily: "Montserrat_400Regular",
     color: "#333",
   },
   detailsContainer: {
@@ -281,7 +324,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 3,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   detailRow: {
     flexDirection: "row",
@@ -294,23 +337,26 @@ const styles = StyleSheet.create({
   },
   detailValue: {
     fontSize: RFValue(14),
+    fontFamily: "Montserrat_400Regular",
   },
   price: {
     fontSize: RFValue(18),
     color: "#c04b37",
-    fontWeight: "bold",
+    fontFamily: "Montserrat_400Regular",
   },
   negotiableText: {
-    fontSize: RFValue(14),
+    fontSize: RFValue(13),
     color: "#c04b37",
     fontStyle: "italic",
+    fontFamily: "Montserrat_400Regular",
   },
   location: {
     fontSize: RFValue(14),
     color: "#666",
+    fontFamily: "Montserrat_400Regular",
   },
   mapContainer: {
-    height: RFValue(200),
+    height: RFValue(170),
     marginVertical: 20,
     borderRadius: 10,
     overflow: "hidden",
@@ -324,15 +370,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 8,
     marginBottom: 30,
+    fontSize: RFValue(15),
+    fontFamily: "Montserrat_400Regular",
   },
   messageButtonText: {
     color: "#fff",
-    fontSize: RFValue(16),
-    fontWeight: "bold",
+    fontSize: RFValue(15),
+    fontFamily: "Montserrat_400Regular",
   },
   loadingText: {
     textAlign: "center",
     fontSize: RFValue(16),
     marginTop: 50,
+    fontFamily: "Montserrat_400Regular",
+  },
+  dotsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: -10,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#333",
+    marginHorizontal: 3,
   },
 });

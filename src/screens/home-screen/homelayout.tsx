@@ -10,11 +10,11 @@ import {
   StatusBar,
   BackHandler,
   Alert,
+  RefreshControl,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import TopBar from "../../components/TopBar/TopBar";
 import SearchBar from "../../components/SearchBar/SearchBar";
-import TabButtons from "../../components/TabButtons/TabButtons";
 import { Ionicons } from "@expo/vector-icons";
 import MessageScreen from "../message-screen/MessageScreen";
 import LearnScreen from "../learn-screen/LearnScreen";
@@ -76,6 +76,8 @@ const HomeScreen1: React.FC = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>(); // Use typed navigation
   const [requestedListings, setRequestedListings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [sellListings, setSellListings] = useState<SellListing[]>([]); // State for sell livestock listings
 
@@ -174,6 +176,13 @@ const HomeScreen1: React.FC = () => {
     }
   };
 
+  const onRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchRequestedListings();
+    await fetchSellListings();
+    setIsRefreshing(false);
+  };
+
   const handlePressMessage = async (
     postOwnerId: number,
     userName: string,
@@ -214,27 +223,6 @@ const HomeScreen1: React.FC = () => {
     }
   };
 
-  // const renderRequestCard = ({ item }: { item: RequestedListing }) => (
-  //   <LivestockCard
-  //     userImage={`http://192.168.29.149:3000/uploads/profile-images/${item.user.profile_image}`}
-  //     userName={`${item.user.first_name} ${item.user.last_name}`}
-  //     postDate={new Date(item.created_at).toLocaleDateString()}
-  //     description={item.description}
-  //     livestockType={item.type}
-  //     preferredPrice={item.preferred_price.toLocaleString()}
-  //     quantity={item.quantity}
-  //     postOwnerId={item.user.id.toString()} // Pass the post owner's ID
-  //     currentUserId={currentUserId || ""} // Pass the logged-in user's ID
-  //     onMessagePress={() =>
-  //       handlePressMessage(
-  //         item.user.id,
-  //         `${item.user.first_name} ${item.user.last_name}`,
-  //         `http://192.168.29.149:3000/uploads/profile-images/${item.user.profile_image}`
-  //       )
-  //     }
-  //   />
-  // );
-
   const renderRequestCard = ({ item }: { item: RequestedListing }) => {
     if (!item.user) {
       console.warn(
@@ -269,33 +257,6 @@ const HomeScreen1: React.FC = () => {
     );
   };
 
-  // Render Sell Livestock Card (added this function)
-  // const renderSellLivestockCard = ({ item }: { item: SellListing }) => (
-  //   <SellLivestockCard
-  //     userImage={`http://192.168.29.149:3000/uploads/profile-images/${item.user.profile_image}`}
-  //     userName={`${item.user.first_name} ${item.user.last_name}`}
-  //     postDate={new Date(item.created_at).toLocaleDateString()}
-  //     livestockImage={`http://192.168.29.149:3000/uploads/livestock-images/${item.images[0]}`} // Added livestockImage here
-  //     livestockType={item.type}
-  //     price={item.price.toLocaleString()}
-  //     negotiable={item.negotiable}
-  //     description={item.description}
-  //     location={`${item.user.town || "N/A"}, ${item.user.barangay || "N/A"}`} // Updated location
-  //     onMessagePress={() =>
-  //       handlePressMessage(
-  //         item.user.id,
-  //         `${item.user.first_name} ${item.user.last_name}`,
-  //         `http://192.168.29.149:3000/uploads/profile-images/${item.user.profile_image}`
-  //       )
-  //     }
-  //     onDetailsPress={() =>
-  //       navigation.navigate("ListingDetailsScreen", {
-  //         listingId: item.id,
-  //       })
-  //     }
-  //   />
-  // );
-
   const validSellListings = sellListings.filter((item) => item.user !== null);
 
   const renderSellLivestockCard = ({ item }: { item: SellListing }) => {
@@ -313,8 +274,6 @@ const HomeScreen1: React.FC = () => {
           )
         : ["http://192.168.29.149:3000/uploads/livestock-images/default.png"]; // Fallback to a default image if none provided
 
-    console.log("Livestock Images for card:", livestockImageUrls);
-
     return (
       <SellLivestockCard
         userImage={
@@ -330,6 +289,8 @@ const HomeScreen1: React.FC = () => {
         negotiable={item.negotiable}
         description={item.description}
         location={`${item.user.town || "N/A"}, ${item.user.barangay || "N/A"}`} // Updated location
+        postOwnerId={item.user.id.toString()}
+        currentUserId={currentUserId || ""}
         onMessagePress={() =>
           handlePressMessage(
             item.user.id,
@@ -452,6 +413,12 @@ const HomeScreen1: React.FC = () => {
                   data={requestedListings}
                   keyExtractor={(item) => item.id.toString()}
                   renderItem={renderRequestCard}
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={isRefreshing}
+                      onRefresh={onRefresh}
+                    />
+                  }
                   contentContainerStyle={styles.requestCardContainer}
                   ListEmptyComponent={() =>
                     isLoading ? (
@@ -524,7 +491,13 @@ const HomeScreen1: React.FC = () => {
                 <FlatList
                   data={validSellListings}
                   keyExtractor={(item) => item.id.toString()}
-                  renderItem={renderSellLivestockCard} // Use renderSellLivestockCard here
+                  renderItem={renderSellLivestockCard}
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={isRefreshing}
+                      onRefresh={onRefresh}
+                    />
+                  }
                   contentContainerStyle={styles.requestCardContainer}
                   ListEmptyComponent={() =>
                     isLoading ? (
@@ -593,69 +566,6 @@ const HomeScreen1: React.FC = () => {
                   }}
                   scrollEventThrottle={16}
                 />
-
-                // <ScrollView
-                //   contentContainerStyle={styles.contentContainer}
-                //   onScroll={({ nativeEvent }) => {
-                //     const currentOffset = nativeEvent.contentOffset.y;
-                //     const isScrollingDown = currentOffset > lastScrollY.current;
-
-                //     if (Math.abs(currentOffset - lastScrollY.current) > 10) {
-                //       if (isScrollingDown) {
-                //         Animated.parallel([
-                //           Animated.timing(bottomNavOpacity, {
-                //             toValue: 0,
-                //             duration: 300,
-                //             useNativeDriver: true,
-                //           }),
-                //           Animated.timing(bottomNavTranslateY, {
-                //             toValue: 100,
-                //             duration: 300,
-                //             useNativeDriver: true,
-                //           }),
-                //           Animated.timing(createListingOpacity, {
-                //             toValue: 0,
-                //             duration: 300,
-                //             useNativeDriver: true,
-                //           }),
-                //           Animated.timing(createListingTranslateY, {
-                //             toValue: 100,
-                //             duration: 300,
-                //             useNativeDriver: true,
-                //           }),
-                //         ]).start();
-                //       } else {
-                //         Animated.parallel([
-                //           Animated.timing(bottomNavOpacity, {
-                //             toValue: 1,
-                //             duration: 300,
-                //             useNativeDriver: true,
-                //           }),
-                //           Animated.timing(bottomNavTranslateY, {
-                //             toValue: 0,
-                //             duration: 300,
-                //             useNativeDriver: true,
-                //           }),
-                //           Animated.timing(createListingOpacity, {
-                //             toValue: 1,
-                //             duration: 300,
-                //             useNativeDriver: true,
-                //           }),
-                //           Animated.timing(createListingTranslateY, {
-                //             toValue: 0,
-                //             duration: 300,
-                //             useNativeDriver: true,
-                //           }),
-                //         ]).start();
-                //       }
-                //     }
-
-                //     lastScrollY.current = currentOffset;
-                //   }}
-                //   scrollEventThrottle={16}
-                // >
-                //   {generateDummyContent(30)}
-                // </ScrollView>
               )}
             </View>
 
@@ -872,7 +782,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   topBar2: {
-    height: 80,
+    height: 84,
     // marginBottom: 30,
     backgroundColor: "#ffffff",
     // borderColor: "red",
@@ -901,8 +811,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   tabButtons: {
-    height: 45,
-    marginBottom: 5,
+    height: 43,
+    marginBottom: 12,
     backgroundColor: "#ffffff",
     // Add additional styles for tab buttons
   },

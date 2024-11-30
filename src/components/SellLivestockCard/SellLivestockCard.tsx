@@ -22,6 +22,8 @@ interface SellLivestockCardProps {
   location: string; // Town and barangay
   onMessagePress: () => void;
   onDetailsPress: () => void;
+  postOwnerId: string; // ID of the user who created the post
+  currentUserId: string; // ID of the logged-in user
 }
 
 const SellLivestockCard: React.FC<SellLivestockCardProps> = ({
@@ -36,6 +38,8 @@ const SellLivestockCard: React.FC<SellLivestockCardProps> = ({
   location,
   onMessagePress,
   onDetailsPress,
+  postOwnerId,
+  currentUserId,
 }) => {
   console.log("Livestock Images URL Array:", livestockImages);
 
@@ -88,9 +92,15 @@ const SellLivestockCard: React.FC<SellLivestockCardProps> = ({
 
       {/* Buttons */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.messageButton} onPress={onMessagePress}>
-          <Text style={styles.buttonText}>MESSAGE</Text>
-        </TouchableOpacity>
+        {/* Only show the Message button if the current user is not the post owner */}
+        {currentUserId !== postOwnerId && (
+          <TouchableOpacity
+            style={styles.messageButton}
+            onPress={onMessagePress}
+          >
+            <Text style={styles.buttonText}>MESSAGE</Text>
+          </TouchableOpacity>
+        )}
         <TouchableOpacity style={styles.detailsButton} onPress={onDetailsPress}>
           <Text style={styles.buttonText}>DETAILS</Text>
         </TouchableOpacity>
@@ -113,7 +123,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     marginBottom: 10,
     marginHorizontal: 10,
-    width: "95%",
+    width: "97%",
     alignSelf: "center",
   },
   userContainer: {
@@ -168,11 +178,12 @@ const styles = StyleSheet.create({
     color: "#333",
     marginBottom: 8,
     paddingHorizontal: 5,
-    paddingVertical: 8,
+    paddingVertical: 15,
     backgroundColor: "#f9f9f9",
-    borderRadius: 4,
-    borderColor: "#e6e6e6",
-    borderWidth: 0.5,
+    borderRadius: 2,
+    borderColor: "#000000",
+    borderWidth: 0.1,
+    fontFamily: "Montserrat_400Regular",
   },
   location: {
     fontSize: RFValue(11),
@@ -185,7 +196,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   messageButton: {
-    backgroundColor: "#4a4a4a",
+    backgroundColor: "#65884E",
     borderRadius: 8,
     paddingVertical: 10,
     alignItems: "center",
@@ -193,7 +204,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   detailsButton: {
-    backgroundColor: "#e6e6e6",
+    backgroundColor: "#808080",
     borderRadius: 8,
     paddingVertical: 10,
     alignItems: "center",
