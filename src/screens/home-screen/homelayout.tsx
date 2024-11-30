@@ -25,6 +25,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, NavigationProp } from "@react-navigation/native"; // For navigation
 import { RootStackParamList } from "../../navigation/type";
 import LivestockCard from "../../components/RequestCard/RequestCard";
+import SellLivestockCard from "../../components/SellLivestockCard/SellLivestockCard";
 
 interface RequestedListing {
   id: number;
@@ -38,6 +39,26 @@ interface RequestedListing {
   preferred_price: number;
   quantity: number;
   description: string;
+  created_at: string;
+}
+
+interface SellListing {
+  id: number;
+  user: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    profile_image: string;
+    town: string; // Added town
+    barangay: string; // Added barangay
+  };
+  type: string;
+  price: number;
+  negotiable: boolean;
+  quantity: number;
+  weight_per_kg: number;
+  description: string;
+  images: string[];
   created_at: string;
 }
 
@@ -56,6 +77,7 @@ const HomeScreen1: React.FC = () => {
   const [requestedListings, setRequestedListings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [sellListings, setSellListings] = useState<SellListing[]>([]); // State for sell livestock listings
 
   useFocusEffect(
     React.useCallback(() => {
@@ -68,6 +90,7 @@ const HomeScreen1: React.FC = () => {
 
         if (params?.refreshRequestedListings) {
           await fetchRequestedListings();
+          await fetchSellListings();
           navigation.setParams({ refreshRequestedListings: false }); // Reset the parameter
         }
       };
@@ -87,7 +110,7 @@ const HomeScreen1: React.FC = () => {
         setCurrentUserId(userId);
 
         const response = await axios.get(
-          `http://192.168.58.149:3000/users/${userId}`
+          `http://192.168.29.149:3000/users/${userId}`
         );
         const userData = response.data;
 
@@ -95,7 +118,7 @@ const HomeScreen1: React.FC = () => {
 
         if (userData.profile_image) {
           setProfileImageUrl(
-            `http://192.168.58.149:3000/uploads/profile-images/${userData.profile_image}`
+            `http://192.168.29.149:3000/uploads/profile-images/${userData.profile_image}`
           );
         } else {
           console.warn("Profile image not found in user data");
@@ -107,13 +130,14 @@ const HomeScreen1: React.FC = () => {
 
     fetchUserProfile();
     fetchRequestedListings();
+    fetchSellListings(); // Fetch sell listings on component mount
   }, []);
 
   const fetchRequestedListings = async () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        "http://192.168.58.149:3000/requested-listings"
+        "http://192.168.29.149:3000/requested-listings"
       );
 
       // Sort posts by creation date (newest first)
@@ -125,6 +149,26 @@ const HomeScreen1: React.FC = () => {
       setRequestedListings(sortedListings);
     } catch (error) {
       console.error("Failed to fetch requested listings:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchSellListings = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(
+        "http://192.168.29.149:3000/livestock-listings"
+      );
+
+      const sortedSellListings = response.data.sort(
+        (a: SellListing, b: SellListing) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+
+      setSellListings(sortedSellListings);
+    } catch (error) {
+      console.error("Failed to fetch sell livestock listings:", error);
     } finally {
       setIsLoading(false);
     }
@@ -147,7 +191,7 @@ const HomeScreen1: React.FC = () => {
 
       // Call backend to create or fetch the conversation
       const response = await axios.post(
-        "http://192.168.58.149:3000/conversations",
+        "http://192.168.29.149:3000/conversations",
         {
           userIds: [currentUserIdNum, postOwnerId],
         }
@@ -170,26 +214,137 @@ const HomeScreen1: React.FC = () => {
     }
   };
 
-  const renderRequestCard = ({ item }: { item: RequestedListing }) => (
-    <LivestockCard
-      userImage={`http://192.168.58.149:3000/uploads/profile-images/${item.user.profile_image}`}
-      userName={`${item.user.first_name} ${item.user.last_name}`}
-      postDate={new Date(item.created_at).toLocaleDateString()}
-      description={item.description}
-      livestockType={item.type}
-      preferredPrice={item.preferred_price.toLocaleString()}
-      quantity={item.quantity}
-      postOwnerId={item.user.id.toString()} // Pass the post owner's ID
-      currentUserId={currentUserId || ""} // Pass the logged-in user's ID
-      onMessagePress={() =>
-        handlePressMessage(
-          item.user.id,
-          `${item.user.first_name} ${item.user.last_name}`,
-          `http://192.168.58.149:3000/uploads/profile-images/${item.user.profile_image}`
-        )
-      }
-    />
-  );
+  // const renderRequestCard = ({ item }: { item: RequestedListing }) => (
+  //   <LivestockCard
+  //     userImage={`http://192.168.29.149:3000/uploads/profile-images/${item.user.profile_image}`}
+  //     userName={`${item.user.first_name} ${item.user.last_name}`}
+  //     postDate={new Date(item.created_at).toLocaleDateString()}
+  //     description={item.description}
+  //     livestockType={item.type}
+  //     preferredPrice={item.preferred_price.toLocaleString()}
+  //     quantity={item.quantity}
+  //     postOwnerId={item.user.id.toString()} // Pass the post owner's ID
+  //     currentUserId={currentUserId || ""} // Pass the logged-in user's ID
+  //     onMessagePress={() =>
+  //       handlePressMessage(
+  //         item.user.id,
+  //         `${item.user.first_name} ${item.user.last_name}`,
+  //         `http://192.168.29.149:3000/uploads/profile-images/${item.user.profile_image}`
+  //       )
+  //     }
+  //   />
+  // );
+
+  const renderRequestCard = ({ item }: { item: RequestedListing }) => {
+    if (!item.user) {
+      console.warn(
+        `Missing user information for requested listing ID: ${item.id}`
+      );
+      return null;
+    }
+
+    return (
+      <LivestockCard
+        userImage={
+          item.user?.profile_image
+            ? `http://192.168.29.149:3000/uploads/profile-images/${item.user.profile_image}`
+            : "http://192.168.29.149:3000/uploads/profile-images/default.png" // Fallback to a default image
+        }
+        userName={`${item.user.first_name} ${item.user.last_name}`}
+        postDate={new Date(item.created_at).toLocaleDateString()}
+        description={item.description}
+        livestockType={item.type}
+        preferredPrice={item.preferred_price.toLocaleString()}
+        quantity={item.quantity}
+        postOwnerId={item.user.id.toString()} // Pass the post owner's ID
+        currentUserId={currentUserId || ""} // Pass the logged-in user's ID
+        onMessagePress={() =>
+          handlePressMessage(
+            item.user.id,
+            `${item.user.first_name} ${item.user.last_name}`,
+            `http://192.168.29.149:3000/uploads/profile-images/${item.user.profile_image}`
+          )
+        }
+      />
+    );
+  };
+
+  // Render Sell Livestock Card (added this function)
+  // const renderSellLivestockCard = ({ item }: { item: SellListing }) => (
+  //   <SellLivestockCard
+  //     userImage={`http://192.168.29.149:3000/uploads/profile-images/${item.user.profile_image}`}
+  //     userName={`${item.user.first_name} ${item.user.last_name}`}
+  //     postDate={new Date(item.created_at).toLocaleDateString()}
+  //     livestockImage={`http://192.168.29.149:3000/uploads/livestock-images/${item.images[0]}`} // Added livestockImage here
+  //     livestockType={item.type}
+  //     price={item.price.toLocaleString()}
+  //     negotiable={item.negotiable}
+  //     description={item.description}
+  //     location={`${item.user.town || "N/A"}, ${item.user.barangay || "N/A"}`} // Updated location
+  //     onMessagePress={() =>
+  //       handlePressMessage(
+  //         item.user.id,
+  //         `${item.user.first_name} ${item.user.last_name}`,
+  //         `http://192.168.29.149:3000/uploads/profile-images/${item.user.profile_image}`
+  //       )
+  //     }
+  //     onDetailsPress={() =>
+  //       navigation.navigate("ListingDetailsScreen", {
+  //         listingId: item.id,
+  //       })
+  //     }
+  //   />
+  // );
+
+  const validSellListings = sellListings.filter((item) => item.user !== null);
+
+  const renderSellLivestockCard = ({ item }: { item: SellListing }) => {
+    if (!item.user) {
+      console.warn(`Missing user information for sell listing ID: ${item.id}`);
+      return null;
+    }
+
+    const livestockImageUrls =
+      item.images?.length > 0
+        ? item.images.map((image) =>
+            image.includes("http")
+              ? image
+              : `http://192.168.29.149:3000/${image.replace(/\\/g, "/")}`
+          )
+        : ["http://192.168.29.149:3000/uploads/livestock-images/default.png"]; // Fallback to a default image if none provided
+
+    console.log("Livestock Images for card:", livestockImageUrls);
+
+    return (
+      <SellLivestockCard
+        userImage={
+          item.user?.profile_image
+            ? `http://192.168.29.149:3000/uploads/profile-images/${item.user.profile_image}`
+            : "http://192.168.29.149:3000/uploads/profile-images/default.png" // Fallback to a default image
+        }
+        userName={`${item.user.first_name} ${item.user.last_name}`}
+        postDate={new Date(item.created_at).toLocaleDateString()}
+        livestockImages={livestockImageUrls}
+        livestockType={item.type}
+        price={item.price.toLocaleString()}
+        negotiable={item.negotiable}
+        description={item.description}
+        location={`${item.user.town || "N/A"}, ${item.user.barangay || "N/A"}`} // Updated location
+        onMessagePress={() =>
+          handlePressMessage(
+            item.user.id,
+            `${item.user.first_name} ${item.user.last_name}`,
+            `http://192.168.29.149:3000/uploads/profile-images/${item.user.profile_image}`
+          )
+        }
+        onDetailsPress={() =>
+          navigation.navigate("ListingDetailsScreen", {
+            listingId: item.id,
+          })
+        }
+      />
+    );
+  };
 
   useFocusEffect(
     React.useCallback(() => {
@@ -221,7 +376,7 @@ const HomeScreen1: React.FC = () => {
                 if (sessionToken) {
                   // Make API call to set the session to expire in 2 minutes
                   await axios.put(
-                    "http://192.168.58.149:3000/users/expire-session",
+                    "http://192.168.29.149:3000/users/expire-session",
                     {
                       sessionToken,
                     }
@@ -255,131 +410,6 @@ const HomeScreen1: React.FC = () => {
       </Text>
     ));
   };
-  //   switch (activeScreen) {
-  //     case "Home":
-  //       return (
-  //         <>
-  //           {/* Search Bar Area */}
-  //           <View style={styles.searchBar}>
-  //             {/* Search input will go here */}
-  //             <SearchBar placeholder="Search Livestock" />
-  //           </View>
-
-  //           <View style={styles.tabButtons}>
-  //             <View style={styles.buttonContainer}>
-  //               <TouchableOpacity
-  //                 style={[
-  //                   styles.forSaleButton,
-  //                   activeTab === "ForSale" && styles.activeButton,
-  //                 ]}
-  //                 onPress={() => setActiveTab("ForSale")}
-  //               >
-  //                 <Text style={styles.buttonText}>For Sale</Text>
-  //               </TouchableOpacity>
-  //               <TouchableOpacity
-  //                 style={[
-  //                   styles.lookingForButton,
-  //                   activeTab === "LookingFor" && styles.activeButton,
-  //                 ]}
-  //                 onPress={() => setActiveTab("LookingFor")}
-  //               >
-  //                 <Text style={styles.buttonText}>Looking for</Text>
-  //               </TouchableOpacity>
-  //             </View>
-  //           </View>
-
-  //           <View style={styles.scrollableContent}>
-  //             <ScrollView
-  //               contentContainerStyle={styles.contentContainer}
-  //               onScroll={({ nativeEvent }) => {
-  //                 const currentOffset = nativeEvent.contentOffset.y;
-  //                 const isScrollingDown = currentOffset > lastScrollY.current;
-
-  //                 if (Math.abs(currentOffset - lastScrollY.current) > 10) {
-  //                   // Check if the scroll is significant
-  //                   if (isScrollingDown) {
-  //                     // Animate bottom nav hiding (slide down and fade out)
-  //                     Animated.parallel([
-  //                       Animated.timing(bottomNavOpacity, {
-  //                         toValue: 0,
-  //                         duration: 300,
-  //                         useNativeDriver: true,
-  //                       }),
-  //                       Animated.timing(bottomNavTranslateY, {
-  //                         toValue: 100,
-  //                         duration: 300,
-  //                         useNativeDriver: true,
-  //                       }),
-  //                       Animated.timing(createListingOpacity, {
-  //                         toValue: 0,
-  //                         duration: 300,
-  //                         useNativeDriver: true,
-  //                       }),
-  //                       Animated.timing(createListingTranslateY, {
-  //                         toValue: 100,
-  //                         duration: 300,
-  //                         useNativeDriver: true,
-  //                       }),
-  //                     ]).start();
-  //                   } else {
-  //                     // Animate bottom nav showing (slide up and fade in)
-  //                     Animated.parallel([
-  //                       Animated.timing(bottomNavOpacity, {
-  //                         toValue: 1,
-  //                         duration: 300,
-  //                         useNativeDriver: true,
-  //                       }),
-  //                       Animated.timing(bottomNavTranslateY, {
-  //                         toValue: 0,
-  //                         duration: 300,
-  //                         useNativeDriver: true,
-  //                       }),
-  //                       Animated.timing(createListingOpacity, {
-  //                         toValue: 1,
-  //                         duration: 300,
-  //                         useNativeDriver: true,
-  //                       }),
-  //                       Animated.timing(createListingTranslateY, {
-  //                         toValue: 0,
-  //                         duration: 300,
-  //                         useNativeDriver: true,
-  //                       }),
-  //                     ]).start();
-  //                   }
-  //                 }
-
-  //                 lastScrollY.current = currentOffset;
-  //               }}
-  //               scrollEventThrottle={16}
-  //             >
-  //               {generateDummyContent(30)}
-  //             </ScrollView>
-  //           </View>
-
-  //           {menuVisible && ( // Conditional rendering for the menu
-  //             <View style={styles.menu}>
-  //               <TouchableOpacity
-  //                 style={styles.menuItem}
-  //                 onPress={() => {
-  //                   setMenuVisible(false);
-  //                   navigation.navigate("SellLivestock"); // Navigate to Sell Livestock screen
-  //                 }}
-  //               >
-  //                 <Text style={styles.menuText}>Sell Livestock</Text>
-  //               </TouchableOpacity>
-  //               <TouchableOpacity
-  //                 style={styles.menuItem}
-  //                 onPress={() => {
-  //                   setMenuVisible(false);
-  //                   navigation.navigate("BuyLivestock"); // Navigate to Buy Livestock screen
-  //                 }}
-  //               >
-  //                 <Text style={styles.menuText}>Look for Livestock</Text>
-  //               </TouchableOpacity>
-  //             </View>
-  //           )}
-  //         </>
-  //       );
 
   const renderContent = () => {
     switch (activeScreen) {
@@ -491,8 +521,20 @@ const HomeScreen1: React.FC = () => {
                   scrollEventThrottle={16}
                 />
               ) : (
-                <ScrollView
-                  contentContainerStyle={styles.contentContainer}
+                <FlatList
+                  data={validSellListings}
+                  keyExtractor={(item) => item.id.toString()}
+                  renderItem={renderSellLivestockCard} // Use renderSellLivestockCard here
+                  contentContainerStyle={styles.requestCardContainer}
+                  ListEmptyComponent={() =>
+                    isLoading ? (
+                      <Text style={styles.emptyMessage}>Loading...</Text>
+                    ) : (
+                      <Text style={styles.emptyMessage}>
+                        No listings available.
+                      </Text>
+                    )
+                  }
                   onScroll={({ nativeEvent }) => {
                     const currentOffset = nativeEvent.contentOffset.y;
                     const isScrollingDown = currentOffset > lastScrollY.current;
@@ -550,9 +592,70 @@ const HomeScreen1: React.FC = () => {
                     lastScrollY.current = currentOffset;
                   }}
                   scrollEventThrottle={16}
-                >
-                  {generateDummyContent(30)}
-                </ScrollView>
+                />
+
+                // <ScrollView
+                //   contentContainerStyle={styles.contentContainer}
+                //   onScroll={({ nativeEvent }) => {
+                //     const currentOffset = nativeEvent.contentOffset.y;
+                //     const isScrollingDown = currentOffset > lastScrollY.current;
+
+                //     if (Math.abs(currentOffset - lastScrollY.current) > 10) {
+                //       if (isScrollingDown) {
+                //         Animated.parallel([
+                //           Animated.timing(bottomNavOpacity, {
+                //             toValue: 0,
+                //             duration: 300,
+                //             useNativeDriver: true,
+                //           }),
+                //           Animated.timing(bottomNavTranslateY, {
+                //             toValue: 100,
+                //             duration: 300,
+                //             useNativeDriver: true,
+                //           }),
+                //           Animated.timing(createListingOpacity, {
+                //             toValue: 0,
+                //             duration: 300,
+                //             useNativeDriver: true,
+                //           }),
+                //           Animated.timing(createListingTranslateY, {
+                //             toValue: 100,
+                //             duration: 300,
+                //             useNativeDriver: true,
+                //           }),
+                //         ]).start();
+                //       } else {
+                //         Animated.parallel([
+                //           Animated.timing(bottomNavOpacity, {
+                //             toValue: 1,
+                //             duration: 300,
+                //             useNativeDriver: true,
+                //           }),
+                //           Animated.timing(bottomNavTranslateY, {
+                //             toValue: 0,
+                //             duration: 300,
+                //             useNativeDriver: true,
+                //           }),
+                //           Animated.timing(createListingOpacity, {
+                //             toValue: 1,
+                //             duration: 300,
+                //             useNativeDriver: true,
+                //           }),
+                //           Animated.timing(createListingTranslateY, {
+                //             toValue: 0,
+                //             duration: 300,
+                //             useNativeDriver: true,
+                //           }),
+                //         ]).start();
+                //       }
+                //     }
+
+                //     lastScrollY.current = currentOffset;
+                //   }}
+                //   scrollEventThrottle={16}
+                // >
+                //   {generateDummyContent(30)}
+                // </ScrollView>
               )}
             </View>
 
