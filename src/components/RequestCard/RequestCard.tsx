@@ -142,7 +142,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
     borderRadius: 2,
     borderColor: "#000000", // Light gray for subtle border
-    borderWidth: 0.2,
+    borderWidth: 0.1,
+    fontFamily: "Montserrat_400Regular",
   },
   detailsContainer: {
     marginBottom: 16,

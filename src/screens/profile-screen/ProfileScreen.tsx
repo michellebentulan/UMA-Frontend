@@ -6,6 +6,8 @@ import {
   Image,
   StyleSheet,
   Alert,
+  FlatList,
+  RefreshControl,
 } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 import { Ionicons } from "@expo/vector-icons";
@@ -13,6 +15,43 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { RootStackParamList } from "../../navigation/type";
+import SellLivestockCard from "../../components/SellLivestockCard/SellLivestockCard";
+import LivestockCard from "../../components/RequestCard/RequestCard";
+
+interface SellListing {
+  id: number;
+  user: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    profile_image: string;
+    town?: string; // Updated: Made optional
+    barangay?: string; // Updated: Made optional
+  };
+  type: string;
+  price: number;
+  negotiable: boolean;
+  quantity: number;
+  weight_per_kg: number;
+  description: string;
+  images: string[];
+  created_at: string;
+}
+
+interface RequestedListing {
+  id: number;
+  user: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    profile_image: string;
+  };
+  type: string;
+  preferred_price: number;
+  quantity: number;
+  description: string;
+  created_at: string;
+}
 
 const ProfileScreen: React.FC = () => {
   const [profileImageUrl, setProfileImageUrl] = useState("");
@@ -23,6 +62,13 @@ const ProfileScreen: React.FC = () => {
   const [town, setTown] = useState<string | undefined>(undefined);
   const [barangay, setBarangay] = useState<string | undefined>(undefined);
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [activeTab, setActiveTab] = useState("ForSale");
+  const [sellListings, setSellListings] = useState<SellListing[]>([]);
+  const [requestedListings, setRequestedListings] = useState<
+    RequestedListing[]
+  >([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   useEffect(() => {
@@ -78,6 +124,8 @@ const ProfileScreen: React.FC = () => {
           } else {
             setLocation("Location not set");
           }
+          // Fetch user's posts for sale and looking for
+          await fetchUserListings(userId);
         }
       } catch (error) {
         console.error("Failed to fetch user profile:", error);
@@ -87,6 +135,36 @@ const ProfileScreen: React.FC = () => {
 
     fetchUserProfile();
   }, []);
+
+  const fetchUserListings = async (userId: string) => {
+    setIsLoading(true);
+    try {
+      // Fetch For Sale listings
+      const sellResponse = await axios.get(
+        `http://192.168.29.149:3000/livestock-listings?userId=${userId}`
+      );
+      setSellListings(sellResponse.data);
+
+      // Fetch Looking For listings
+      const requestedResponse = await axios.get(
+        `http://192.168.29.149:3000/requested-listings?userId=${userId}`
+      );
+      setRequestedListings(requestedResponse.data);
+    } catch (error) {
+      console.error("Failed to fetch user listings:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setIsRefreshing(true);
+    const userId = await AsyncStorage.getItem("userId");
+    if (userId) {
+      await fetchUserListings(userId);
+    }
+    setIsRefreshing(false);
+  };
 
   const handleViewOnMap = () => {
     try {
@@ -119,6 +197,57 @@ const ProfileScreen: React.FC = () => {
     }
   };
 
+  const renderSellLivestockCard = ({ item }: { item: SellListing }) => {
+    // Construct image URLs properly
+    const livestockImageUrls =
+      item.images?.length > 0
+        ? item.images.map((image) =>
+            image.includes("http")
+              ? image
+              : `http://192.168.29.149:3000/${image.replace(/\\/g, "/")}`
+          )
+        : ["http://192.168.29.149:3000/uploads/livestock-images/default.png"]; // Fallback to a default image if none provided
+
+    console.log("Livestock Image URLs:", livestockImageUrls);
+
+    return (
+      <SellLivestockCard
+        userImage={profileImageUrl}
+        userName={userName}
+        postDate={new Date(item.created_at).toLocaleDateString()}
+        livestockImages={livestockImageUrls} // Ensure the URLs are properly formatted
+        livestockType={item.type}
+        price={item.price.toLocaleString()}
+        negotiable={item.negotiable}
+        description={item.description}
+        location={`${item.user.town || "N/A"}, ${item.user.barangay || "N/A"}`}
+        postOwnerId={item.user.id.toString()}
+        currentUserId={item.user.id.toString()}
+        onMessagePress={() => {}}
+        onDetailsPress={() =>
+          navigation.navigate("ListingDetailsScreen", {
+            listingId: item.id,
+          })
+        }
+      />
+    );
+  };
+
+  const renderRequestCard = ({ item }: { item: RequestedListing }) => (
+    <LivestockCard
+      userImage={profileImageUrl}
+      userName={userName}
+      postDate={new Date(item.created_at).toLocaleDateString()}
+      description={item.description}
+      livestockType={item.type}
+      preferredPrice={item.preferred_price.toLocaleString()}
+      quantity={item.quantity}
+      postOwnerId={item.user.id.toString()}
+      currentUserId={item.user.id.toString()}
+      onMessagePress={() => {}}
+    />
+  );
+
   return (
     <View style={styles.container}>
       {/* Header with Menu Button Only */}
@@ -147,12 +276,77 @@ const ProfileScreen: React.FC = () => {
 
       {/* Tab Buttons */}
       <View style={styles.tabButtons}>
-        <TouchableOpacity style={[styles.tabButton, styles.activeButton]}>
-          <Text style={styles.tabButtonTextActive}>For Sale</Text>
+        <TouchableOpacity
+          style={[
+            styles.tabButton,
+            activeTab === "ForSale" && styles.activeButton,
+          ]}
+          onPress={() => setActiveTab("ForSale")}
+        >
+          <Text
+            style={
+              activeTab === "ForSale"
+                ? styles.tabButtonTextActive
+                : styles.tabButtonTextInactive
+            }
+          >
+            For Sale
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.tabButton, styles.inactiveButton]}>
-          <Text style={styles.tabButtonTextInactive}>Looking for</Text>
+        <TouchableOpacity
+          style={[
+            styles.tabButton,
+            activeTab === "LookingFor" && styles.activeButton,
+          ]}
+          onPress={() => setActiveTab("LookingFor")}
+        >
+          <Text
+            style={
+              activeTab === "LookingFor"
+                ? styles.tabButtonTextActive
+                : styles.tabButtonTextInactive
+            }
+          >
+            Looking for
+          </Text>
         </TouchableOpacity>
+      </View>
+
+      {/* Listings Section */}
+      <View style={styles.listingsContainer}>
+        {activeTab === "ForSale" ? (
+          <FlatList
+            data={sellListings}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderSellLivestockCard}
+            refreshControl={
+              <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+            }
+            ListEmptyComponent={() =>
+              isLoading ? (
+                <Text style={styles.emptyMessage}>Loading...</Text>
+              ) : (
+                <Text style={styles.emptyMessage}>No listings available.</Text>
+              )
+            }
+          />
+        ) : (
+          <FlatList
+            data={requestedListings}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderRequestCard}
+            refreshControl={
+              <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+            }
+            ListEmptyComponent={() =>
+              isLoading ? (
+                <Text style={styles.emptyMessage}>Loading...</Text>
+              ) : (
+                <Text style={styles.emptyMessage}>No listings available.</Text>
+              )
+            }
+          />
+        )}
       </View>
     </View>
   );
@@ -162,7 +356,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    padding: 20,
+    padding: 10,
   },
   headerContainer: {
     flexDirection: "row",
@@ -226,6 +420,14 @@ const styles = StyleSheet.create({
   tabButtonTextInactive: {
     color: "#888",
     fontFamily: "Montserrat_400Regular",
+  },
+  listingsContainer: {
+    flex: 1,
+  },
+  emptyMessage: {
+    textAlign: "center",
+    marginTop: 20,
+    color: "gray",
   },
 });
 
