@@ -35,7 +35,7 @@ const ProfileScreen: React.FC = () => {
 
         // Fetch user profile
         const response = await axios.get(
-          `http://192.168.58.149:3000/users/${userId}`
+          `http://192.168.29.149:3000/users/${userId}`
         );
         const userData = response.data;
 
@@ -46,7 +46,7 @@ const ProfileScreen: React.FC = () => {
           setPhoneNumber(userData.phone_number);
           if (userData.profile_image) {
             setProfileImageUrl(
-              `http://192.168.58.149:3000/uploads/profile-images/${userData.profile_image}`
+              `http://192.168.29.149:3000/uploads/profile-images/${userData.profile_image}`
             );
           }
 
@@ -62,7 +62,7 @@ const ProfileScreen: React.FC = () => {
               userData.barangay
             );
             const locationResponse = await axios.get(
-              `http://192.168.58.149:3000/locations?town=${userData.town}&barangay=${userData.barangay}`
+              `http://192.168.29.149:3000/locations?town=${userData.town}&barangay=${userData.barangay}`
             );
             const locationData = locationResponse.data;
 

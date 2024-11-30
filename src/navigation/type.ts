@@ -37,7 +37,6 @@ export type RootStackParamList = {
   CreateAccount: undefined;
   // OTPVerification: undefined;
   CompleteProfile: { userId: string; sessionToken: string };
-  // HomeScreen: undefined;
   MessageScreen: undefined;
   ChatScreen: {
     conversationId: number;
@@ -58,5 +57,8 @@ export type RootStackParamList = {
     barangay: string;
     latitude: number;
     longitude: number;
+  };
+  ListingDetailsScreen: {
+    listingId: number; // Parameter to navigate to ListingDetailsScreen
   };
 };
