@@ -81,7 +81,7 @@ const ProfileScreen: React.FC = () => {
 
         // Fetch user profile
         const response = await axios.get(
-          `http://192.168.29.149:3000/users/${userId}`
+          `http://192.168.137.146:3000/users/${userId}`
         );
         const userData = response.data;
 
@@ -92,7 +92,7 @@ const ProfileScreen: React.FC = () => {
           setPhoneNumber(userData.phone_number);
           if (userData.profile_image) {
             setProfileImageUrl(
-              `http://192.168.29.149:3000/uploads/profile-images/${userData.profile_image}`
+              `http://192.168.137.146:3000/uploads/profile-images/${userData.profile_image}`
             );
           }
 
@@ -108,7 +108,7 @@ const ProfileScreen: React.FC = () => {
               userData.barangay
             );
             const locationResponse = await axios.get(
-              `http://192.168.29.149:3000/locations?town=${userData.town}&barangay=${userData.barangay}`
+              `http://192.168.137.146:3000/locations?town=${userData.town}&barangay=${userData.barangay}`
             );
             const locationData = locationResponse.data;
 
@@ -141,15 +141,30 @@ const ProfileScreen: React.FC = () => {
     try {
       // Fetch For Sale listings
       const sellResponse = await axios.get(
-        `http://192.168.29.149:3000/livestock-listings?userId=${userId}`
+        `http://192.168.137.146:3000/livestock-listings?userId=${userId}`
       );
-      setSellListings(sellResponse.data);
+
+      const filteredSellListings = sellResponse.data
+        .filter((listing: SellListing) => listing.user.id.toString() === userId)
+        .sort(
+          (a: SellListing, b: SellListing) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        ); // Sort by newest first
+      setSellListings(filteredSellListings);
 
       // Fetch Looking For listings
       const requestedResponse = await axios.get(
-        `http://192.168.29.149:3000/requested-listings?userId=${userId}`
+        `http://192.168.137.146:3000/requested-listings?userId=${userId}`
       );
-      setRequestedListings(requestedResponse.data);
+      const filteredRequestedListings = requestedResponse.data
+        .filter(
+          (listing: RequestedListing) => listing.user.id.toString() === userId
+        )
+        .sort(
+          (a: RequestedListing, b: RequestedListing) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        ); // Sort by newest first
+      setRequestedListings(filteredRequestedListings);
     } catch (error) {
       console.error("Failed to fetch user listings:", error);
     } finally {
@@ -204,9 +219,9 @@ const ProfileScreen: React.FC = () => {
         ? item.images.map((image) =>
             image.includes("http")
               ? image
-              : `http://192.168.29.149:3000/${image.replace(/\\/g, "/")}`
+              : `http://192.168.137.146:3000/${image.replace(/\\/g, "/")}`
           )
-        : ["http://192.168.29.149:3000/uploads/livestock-images/default.png"]; // Fallback to a default image if none provided
+        : ["http://192.168.137.146:3000/uploads/livestock-images/default.png"]; // Fallback to a default image if none provided
 
     console.log("Livestock Image URLs:", livestockImageUrls);
 
@@ -253,7 +268,7 @@ const ProfileScreen: React.FC = () => {
       {/* Header with Menu Button Only */}
       <View style={styles.headerContainer}>
         <TouchableOpacity style={styles.menuButton}>
-          <Ionicons name="menu" size={RFValue(20)} color="black" />
+          <Ionicons name="settings-outline" size={RFValue(20)} color="black" />
         </TouchableOpacity>
       </View>
 
@@ -326,7 +341,9 @@ const ProfileScreen: React.FC = () => {
               isLoading ? (
                 <Text style={styles.emptyMessage}>Loading...</Text>
               ) : (
-                <Text style={styles.emptyMessage}>No listings available.</Text>
+                <Text style={styles.emptyMessage}>
+                  You don't have any listings yet.
+                </Text>
               )
             }
           />
@@ -342,7 +359,9 @@ const ProfileScreen: React.FC = () => {
               isLoading ? (
                 <Text style={styles.emptyMessage}>Loading...</Text>
               ) : (
-                <Text style={styles.emptyMessage}>No listings available.</Text>
+                <Text style={styles.emptyMessage}>
+                  You don't have any listings yet.
+                </Text>
               )
             }
           />
@@ -362,14 +381,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 10,
   },
   menuButton: {
     paddingHorizontal: 10,
   },
   profileImageContainer: {
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 15,
   },
   profileImage: {
     width: 100,
@@ -381,18 +400,18 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   userName: {
-    fontSize: RFValue(18),
+    fontSize: RFValue(16),
     fontFamily: "Montserrat_700Bold",
   },
   location: {
-    fontSize: RFValue(14),
+    fontSize: RFValue(12),
     color: "#888",
     fontFamily: "Montserrat_400Regular",
     marginTop: 4,
     textDecorationLine: "underline",
   },
   phoneNumber: {
-    fontSize: RFValue(14),
+    fontSize: RFValue(12),
     color: "#888",
     fontFamily: "Montserrat_400Regular",
     marginTop: 2,

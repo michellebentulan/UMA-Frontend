@@ -112,7 +112,7 @@ const HomeScreen1: React.FC = () => {
         setCurrentUserId(userId);
 
         const response = await axios.get(
-          `http://192.168.29.149:3000/users/${userId}`
+          `http://192.168.137.146:3000/users/${userId}`
         );
         const userData = response.data;
 
@@ -120,7 +120,7 @@ const HomeScreen1: React.FC = () => {
 
         if (userData.profile_image) {
           setProfileImageUrl(
-            `http://192.168.29.149:3000/uploads/profile-images/${userData.profile_image}`
+            `http://192.168.137.146:3000/uploads/profile-images/${userData.profile_image}`
           );
         } else {
           console.warn("Profile image not found in user data");
@@ -139,7 +139,7 @@ const HomeScreen1: React.FC = () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        "http://192.168.29.149:3000/requested-listings"
+        "http://192.168.137.146:3000/requested-listings"
       );
 
       // Sort posts by creation date (newest first)
@@ -160,7 +160,7 @@ const HomeScreen1: React.FC = () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        "http://192.168.29.149:3000/livestock-listings"
+        "http://192.168.137.146:3000/livestock-listings"
       );
 
       const sortedSellListings = response.data.sort(
@@ -200,7 +200,7 @@ const HomeScreen1: React.FC = () => {
 
       // Call backend to create or fetch the conversation
       const response = await axios.post(
-        "http://192.168.29.149:3000/conversations",
+        "http://192.168.137.146:3000/conversations",
         {
           userIds: [currentUserIdNum, postOwnerId],
         }
@@ -235,8 +235,8 @@ const HomeScreen1: React.FC = () => {
       <LivestockCard
         userImage={
           item.user?.profile_image
-            ? `http://192.168.29.149:3000/uploads/profile-images/${item.user.profile_image}`
-            : "http://192.168.29.149:3000/uploads/profile-images/default.png" // Fallback to a default image
+            ? `http://192.168.137.146:3000/uploads/profile-images/${item.user.profile_image}`
+            : "http://192.168.137.146:3000/uploads/profile-images/default.png" // Fallback to a default image
         }
         userName={`${item.user.first_name} ${item.user.last_name}`}
         postDate={new Date(item.created_at).toLocaleDateString()}
@@ -250,7 +250,7 @@ const HomeScreen1: React.FC = () => {
           handlePressMessage(
             item.user.id,
             `${item.user.first_name} ${item.user.last_name}`,
-            `http://192.168.29.149:3000/uploads/profile-images/${item.user.profile_image}`
+            `http://192.168.137.146:3000/uploads/profile-images/${item.user.profile_image}`
           )
         }
       />
@@ -270,16 +270,16 @@ const HomeScreen1: React.FC = () => {
         ? item.images.map((image) =>
             image.includes("http")
               ? image
-              : `http://192.168.29.149:3000/${image.replace(/\\/g, "/")}`
+              : `http://192.168.137.146:3000/${image.replace(/\\/g, "/")}`
           )
-        : ["http://192.168.29.149:3000/uploads/livestock-images/default.png"]; // Fallback to a default image if none provided
+        : ["http://192.168.137.146:3000/uploads/livestock-images/default.png"]; // Fallback to a default image if none provided
 
     return (
       <SellLivestockCard
         userImage={
           item.user?.profile_image
-            ? `http://192.168.29.149:3000/uploads/profile-images/${item.user.profile_image}`
-            : "http://192.168.29.149:3000/uploads/profile-images/default.png" // Fallback to a default image
+            ? `http://192.168.137.146:3000/uploads/profile-images/${item.user.profile_image}`
+            : "http://192.168.137.146:3000/uploads/profile-images/default.png" // Fallback to a default image
         }
         userName={`${item.user.first_name} ${item.user.last_name}`}
         postDate={new Date(item.created_at).toLocaleDateString()}
@@ -295,7 +295,7 @@ const HomeScreen1: React.FC = () => {
           handlePressMessage(
             item.user.id,
             `${item.user.first_name} ${item.user.last_name}`,
-            `http://192.168.29.149:3000/uploads/profile-images/${item.user.profile_image}`
+            `http://192.168.137.146:3000/uploads/profile-images/${item.user.profile_image}`
           )
         }
         onDetailsPress={() =>
@@ -337,7 +337,7 @@ const HomeScreen1: React.FC = () => {
                 if (sessionToken) {
                   // Make API call to set the session to expire in 2 minutes
                   await axios.put(
-                    "http://192.168.29.149:3000/users/expire-session",
+                    "http://192.168.137.146:3000/users/expire-session",
                     {
                       sessionToken,
                     }
@@ -401,7 +401,7 @@ const HomeScreen1: React.FC = () => {
                   ]}
                   onPress={() => setActiveTab("LookingFor")}
                 >
-                  <Text style={styles.buttonText}>Looking for</Text>
+                  <Text style={styles.LookForText}>Looking for</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -849,6 +849,10 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#FFF",
+    fontFamily: "Montserrat_400Regular",
+  },
+  LookForText: {
+    color: "#808080",
     fontFamily: "Montserrat_400Regular",
   },
   bottomNav: {
