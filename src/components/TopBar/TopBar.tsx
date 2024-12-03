@@ -1,27 +1,58 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   Image,
   StyleSheet,
   useWindowDimensions,
+  TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import SvgImage from "../../../assets/svg-images/UMA-Logo.svg";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 interface TopBarProps {
   isOnline: boolean;
   onNotificationsPress?: () => void;
+  onProfilePress?: () => void;
   profileImageUrl?: string;
 }
 
 const TopBar = ({
   isOnline,
   onNotificationsPress,
+  onProfilePress,
   profileImageUrl,
 }: TopBarProps) => {
   // console.log("Received profileImageUrl in TopBar:", profileImageUrl);
   const { width } = useWindowDimensions(); // Dynamically get the screen width
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchUnreadNotifications = async () => {
+      try {
+        const userId = await AsyncStorage.getItem("userId");
+        if (!userId) {
+          throw new Error("User ID not found");
+        }
+
+        const response = await axios.get(
+          `http://192.168.69.149:3000/notifications?userId=${userId}`
+        );
+
+        const unreadNotifications = response.data.filter(
+          (notification: any) => !notification.read
+        );
+
+        setUnreadCount(unreadNotifications.length);
+      } catch (error) {
+        // console.error("Failed to fetch unread notifications:", error);
+      }
+    };
+
+    fetchUnreadNotifications();
+  }, []);
 
   return (
     <View style={styles.topBarContainer}>
@@ -33,38 +64,44 @@ const TopBar = ({
           </Text>
         </View>
 
-        <Ionicons
-          name="notifications-outline"
-          size={width * 0.07}
-          color="#000"
-          style={styles.notificationIcon}
-          onPress={onNotificationsPress}
-        />
+        <TouchableOpacity onPress={onNotificationsPress} style={styles.icon}>
+          <Ionicons name="notifications-outline" size={29} color="black" />
+          {unreadCount > 0 && (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{unreadCount}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
 
         <View style={styles.profileContainer}>
-          <Image
-            source={
-              profileImageUrl && profileImageUrl !== ""
-                ? { uri: profileImageUrl }
-                : require("../../../assets/images/profile.jpg")
-            }
-            style={[
-              styles.profileImage,
-              { width: width * 0.12, height: width * 0.12 },
-            ]}
-            resizeMode="cover"
-          />
-          <View
-            style={[
-              styles.statusDot,
-              {
-                backgroundColor: isOnline ? "green" : "gray",
-                width: width * 0.03,
-                height: width * 0.03,
-                borderRadius: width * 0.02,
-              },
-            ]}
-          />
+          <TouchableOpacity
+            onPress={onProfilePress}
+            style={styles.profileContainer}
+          >
+            <Image
+              source={
+                profileImageUrl && profileImageUrl !== ""
+                  ? { uri: profileImageUrl }
+                  : require("../../../assets/images/profile.jpg")
+              }
+              style={[
+                styles.profileImage,
+                { width: width * 0.12, height: width * 0.12 },
+              ]}
+              resizeMode="cover"
+            />
+            <View
+              style={[
+                styles.statusDot,
+                {
+                  backgroundColor: isOnline ? "green" : "gray",
+                  width: width * 0.03,
+                  height: width * 0.03,
+                  borderRadius: width * 0.02,
+                },
+              ]}
+            />
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -106,6 +143,28 @@ const styles = StyleSheet.create({
     right: 0,
     borderWidth: 2,
     borderColor: "#FFF",
+  },
+  icon: {
+    position: "relative",
+    marginRight: -15,
+    paddingTop: 15,
+    marginHorizontal: 40,
+  },
+  badge: {
+    position: "absolute",
+    right: -10,
+    top: -10,
+    backgroundColor: "#FF3B30",
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badgeText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 12,
   },
 });
 

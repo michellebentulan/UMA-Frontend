@@ -1,8 +1,9 @@
 import React from "react";
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import { useRoute, RouteProp } from "@react-navigation/native";
+import { useRoute, RouteProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "../../navigation/type";
+import { Ionicons } from "@expo/vector-icons";
 
 type MapViewScreenRouteProp = RouteProp<RootStackParamList, "MapViewScreen">;
 
@@ -11,6 +12,7 @@ interface MapViewScreenProps {
 }
 
 const MapViewScreen: React.FC<MapViewScreenProps> = ({ route }) => {
+  const navigation = useNavigation();
   const { town, barangay, latitude, longitude } = route.params;
 
   console.log(
@@ -43,6 +45,14 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route }) => {
 
   return (
     <View style={styles.container}>
+      {/* Close Button */}
+      <TouchableOpacity
+        style={styles.closeButton}
+        onPress={() => navigation.goBack()}
+      >
+        <Ionicons name="close" size={30} color="black" />
+      </TouchableOpacity>
+
       <MapView style={styles.map} initialRegion={region}>
         <Marker
           coordinate={{ latitude, longitude }}
@@ -68,6 +78,15 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 18,
     color: "red",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 30,
+    right: 20,
+    zIndex: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 25,
+    padding: 5,
   },
 });
 
