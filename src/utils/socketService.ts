@@ -4,7 +4,7 @@ import { io, Socket } from "socket.io-client";
 // Define the type for the socket instance
 let socket: Socket | null = null;
 
-const SOCKET_URL = "http://192.168.69.149:3000"; // Replace with your backend URL
+const SOCKET_URL = "http://192.168.74.149:3000"; // Replace with your backend URL
 
 export const initializeSocket = async (): Promise<Socket | null> => {
   // If socket is already initialized, return it.

@@ -38,7 +38,7 @@ const TopBar = ({
         }
 
         const response = await axios.get(
-          `http://192.168.69.149:3000/notifications?userId=${userId}`
+          `http://192.168.74.149:3000/notifications?userId=${userId}`
         );
 
         const unreadNotifications = response.data.filter(

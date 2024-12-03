@@ -52,7 +52,7 @@ const MessageScreen = ({ bottomNavOpacity, bottomNavTranslateY }: any) => {
         await initializeSocket(); // Initialize the socket
 
         const response = await axios.get(
-          "http://192.168.69.149:3000/conversations",
+          "http://192.168.74.149:3000/conversations",
           {
             headers: {
               Authorization: `Bearer ${sessionToken}`, // Use the session token obtained from login

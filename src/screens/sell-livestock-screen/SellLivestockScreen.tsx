@@ -115,7 +115,7 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
 
     try {
       const response = await axios.get(
-        `http://192.168.69.149:3000/price-suggestions/search`,
+        `http://192.168.74.149:3000/price-suggestions/search`,
         {
           params: { livestock_type: livestockType },
         }
@@ -173,7 +173,7 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
       console.log("Livestock Type:", livestockType);
 
       const analyzeResponse = await axios.post(
-        "http://192.168.69.149:3000/livestock/analyze-images",
+        "http://192.168.74.149:3000/livestock/analyze-images",
         formData,
         {
           headers: {
@@ -224,7 +224,7 @@ const SellLivestockScreen: React.FC<SellLivestockScreenProps> = ({
 
       console.log("Submitting listing...");
       const listingResponse = await axios.post(
-        "http://192.168.69.149:3000/livestock-listings",
+        "http://192.168.74.149:3000/livestock-listings",
         listingFormData,
         {
           headers: {
