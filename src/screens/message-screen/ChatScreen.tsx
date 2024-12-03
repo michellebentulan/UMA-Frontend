@@ -21,6 +21,8 @@ import {
   disconnectSocket,
   getSocket,
 } from "../../utils/socketService";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type ChatScreenProps = {
   route: RouteProp<RootStackParamList, "ChatScreen">;
@@ -32,8 +34,18 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [visible, setVisible] = useState(false);
   const [inputText, setInputText] = useState("");
+  const [userId, setUserId] = useState<number | null>(null);
 
   useEffect(() => {
+    const fetchUserId = async () => {
+      const id = await AsyncStorage.getItem("userId");
+      if (id) {
+        setUserId(parseInt(id));
+      }
+    };
+
+    fetchUserId();
+
     const initializeChat = async () => {
       const socket = await initializeSocket(); // Ensure socket is initialized
 
@@ -47,44 +59,161 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
 
       // Listen for new messages
       socket.on("newMessage", (newMessage) => {
+        // Add required fields for the GiftedChat component
+        const formattedMessage = {
+          _id: newMessage._id || Math.random().toString(), // Ensure each message has a unique _id
+          text: newMessage.content || "",
+          createdAt: new Date(newMessage.timestamp || new Date()),
+          user: {
+            _id: newMessage.senderId,
+            name: newMessage.sender?.name || "User",
+          },
+          image: newMessage.imageUrl || null,
+        };
+
         setMessages((previousMessages) =>
-          GiftedChat.append(previousMessages, [newMessage])
+          GiftedChat.append(previousMessages, [formattedMessage])
         );
       });
 
-      if (!socket) {
-        console.error("Socket instance not initialized.");
-        return;
-      }
+      try {
+        const sessionToken = await AsyncStorage.getItem("sessionToken");
+        if (!sessionToken) {
+          throw new Error("Session token not found");
+        }
 
-      return () => {
-        socket.emit("leaveConversation", { conversationId });
-        disconnectSocket();
-      };
+        const response = await axios.get(
+          `http://192.168.69.149:3000/messages/${conversationId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${sessionToken}`,
+            },
+          }
+        );
+
+        const fetchedMessages = response.data.map((message: any) => ({
+          _id: message.id,
+          text: message.content,
+          createdAt: new Date(message.timestamp),
+          user: {
+            _id: message.sender.id,
+            name: `${message.sender.first_name} ${message.sender.last_name}`,
+          },
+        }));
+        setMessages(fetchedMessages);
+      } catch (error) {
+        console.error("Failed to fetch messages:", error);
+      }
     };
 
     initializeChat();
+
+    // Cleanup socket on unmount
+    // return () => {
+    //   const socket = getSocket();
+    //   if (socket) {
+    //     socket.emit("leaveConversation", { conversationId });
+    //     disconnectSocket();
+    //   }
+    // };
   }, [conversationId]);
 
-  const onSend = (newMessages: IMessage[] = []) => {
+  // const onSend = (newMessages: IMessage[] = []) => {
+  //   const socket = getSocket(); // Safely retrieve the socket instance
+  //   if (!socket) {
+  //     console.error("Socket is not connected.");
+  //     return;
+  //   }
+
+  //   // Emit new message through Socket.io
+  //   newMessages.forEach((message) => {
+  //     socket.emit("sendMessage", {
+  //       conversationId,
+  //       ...message, // Spread message directly, which already contains the user field
+  //     });
+  //   });
+
+  //   // Update the local message state
+  //   setMessages((previousMessages) =>
+  //     GiftedChat.append(previousMessages, newMessages)
+  //   );
+  // };
+
+  // const onSend = async (newMessages: IMessage[] = []) => {
+  //   const socket = getSocket(); // Safely retrieve the socket instance
+  //   if (!socket) {
+  //     console.error("Socket is not connected.");
+  //     return;
+  //   }
+
+  //   try {
+  //     // Retrieve the logged-in user's ID
+  //     const userId = await AsyncStorage.getItem("userId");
+  //     if (!userId) {
+  //       console.error("User ID not found. Cannot send message.");
+  //       return;
+  //     }
+
+  //     // Emit new message through Socket.io for each message in the newMessages array
+  //     newMessages.forEach((message) => {
+  //       socket.emit("sendMessage", {
+  //         conversationId,
+  //         content: message.text,
+  //         senderId: userId, // Use the logged-in user's ID
+  //         imageUrl: message.image || null, // Include image if there is one
+  //       });
+  //     });
+
+  //     // Update the local message state to immediately reflect the new message
+  //     setMessages((previousMessages) =>
+  //       GiftedChat.append(previousMessages, newMessages)
+  //     );
+  //   } catch (error) {
+  //     console.error("Error while sending message:", error);
+  //   }
+  // };
+
+  const onSend = async (newMessages: IMessage[] = []) => {
     const socket = getSocket(); // Safely retrieve the socket instance
     if (!socket) {
       console.error("Socket is not connected.");
       return;
     }
 
-    // Emit new message through Socket.io
-    newMessages.forEach((message) => {
-      socket.emit("sendMessage", {
-        conversationId,
-        ...message, // Spread message directly, which already contains the user field
-      });
-    });
+    try {
+      // Retrieve the logged-in user's ID
+      if (!userId) {
+        console.error("User ID not found. Cannot send message.");
+        return;
+      }
 
-    // Update the local message state
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, newMessages)
-    );
+      // Emit new message through Socket.io for each message in the newMessages array
+      newMessages.forEach((message) => {
+        const formattedMessage = {
+          conversationId,
+          content: message.text,
+          senderId: userId, // Use the logged-in user's ID
+          imageUrl: message.image || null, // Include image if there is one
+        };
+
+        // Emit to socket server
+        socket.emit("sendMessage", formattedMessage);
+
+        // Update the local state with GiftedChat format
+        // const localMessage = {
+        //   ...message,
+        //   _id: message._id || Math.random().toString(),
+        //   user: {
+        //     _id: userId,
+        //   },
+        // };
+        // setMessages((previousMessages) =>
+        //   GiftedChat.append(previousMessages, [localMessage])
+        // );
+      });
+    } catch (error) {
+      console.error("Error while sending message:", error);
+    }
   };
 
   const openMenu = () => setVisible(true);
@@ -214,33 +343,35 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
       </View>
 
       {/* Conditionally render the chat */}
-      <GiftedChat
-        messages={messages}
-        onSend={(newMessages) => onSend(newMessages)}
-        user={{
-          _id: 1,
-        }}
-        renderInputToolbar={() => (
-          <View style={styles.inputContainer}>
-            <TouchableOpacity style={styles.iconButton} onPress={selectImage}>
-              <Ionicons name="image-outline" size={28} color="#888" />
-            </TouchableOpacity>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Type a message..."
-              placeholderTextColor="#aaa"
-              value={inputText}
-              onChangeText={setInputText}
-            />
-            <TouchableOpacity
-              style={styles.iconButton}
-              onPress={handleSendMessage}
-            >
-              <Ionicons name="send-outline" size={28} color="#007AFF" />
-            </TouchableOpacity>
-          </View>
-        )}
-      />
+      {userId !== null && (
+        <GiftedChat
+          messages={messages}
+          onSend={(newMessages) => onSend(newMessages)}
+          user={{
+            _id: userId || -1, // Use fallback value
+          }}
+          renderInputToolbar={() => (
+            <View style={styles.inputContainer}>
+              <TouchableOpacity style={styles.iconButton} onPress={selectImage}>
+                <Ionicons name="image-outline" size={28} color="#888" />
+              </TouchableOpacity>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Type a message..."
+                placeholderTextColor="#aaa"
+                value={inputText}
+                onChangeText={setInputText}
+              />
+              <TouchableOpacity
+                style={styles.iconButton}
+                onPress={handleSendMessage}
+              >
+                <Ionicons name="send-outline" size={28} color="#007AFF" />
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+      )}
     </View>
   );
 };

@@ -90,7 +90,7 @@ const BuyLivestockScreen: React.FC<BuyLivestockScreenProps> = ({
       console.log("Sending data to backend:", listingData);
 
       await axios.post(
-        "http://192.168.137.146:3000/requested-listings",
+        "http://192.168.69.149:3000/requested-listings",
         listingData
       );
 

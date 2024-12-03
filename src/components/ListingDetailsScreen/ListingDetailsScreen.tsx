@@ -38,14 +38,14 @@ const ListingDetailsScreen: React.FC<ListingDetailsScreenProps> = ({
       setIsLoading(true);
       try {
         const response = await axios.get(
-          `http://192.168.137.146:3000/livestock-listings/${listingId}`
+          `http://192.168.69.149:3000/livestock-listings/${listingId}`
         );
         console.log("Listing response:", response.data); // Log the response
         setListing(response.data);
 
         // Fetch location details
         const locationResponse = await axios.get(
-          `http://192.168.137.146:3000/locations?town=${response.data.user.town}&barangay=${response.data.user.barangay}`
+          `http://192.168.69.149:3000/locations?town=${response.data.user.town}&barangay=${response.data.user.barangay}`
         );
         if (locationResponse.data && locationResponse.data.length > 0) {
           setLocation(locationResponse.data[0]);
@@ -89,7 +89,7 @@ const ListingDetailsScreen: React.FC<ListingDetailsScreenProps> = ({
         style={styles.closeButton}
         onPress={() => navigation.goBack()}
       >
-        <Ionicons name="close" size={RFValue(24)} color="black" />
+        <Ionicons name="close" size={RFValue(23)} color="black" />
       </TouchableOpacity>
 
       {/* Scrollable Content */}
@@ -98,7 +98,7 @@ const ListingDetailsScreen: React.FC<ListingDetailsScreenProps> = ({
         <View style={styles.userInfoContainer}>
           <Image
             source={{
-              uri: `http://192.168.137.146:3000/uploads/profile-images/${listing.user.profile_image}`,
+              uri: `http://192.168.69.149:3000/uploads/profile-images/${listing.user.profile_image}`,
             }}
             style={styles.userImage}
           />
@@ -129,13 +129,13 @@ const ListingDetailsScreen: React.FC<ListingDetailsScreenProps> = ({
                 source={{
                   uri: item.startsWith("http")
                     ? item
-                    : `http://192.168.137.146:3000/${item}`,
+                    : `http://192.168.69.149:3000/${item}`,
                 }}
                 style={styles.listingImage}
                 onError={() =>
                   console.error(
                     "Failed to load listing image:",
-                    `http://192.168.137.146:3000/${item}`
+                    `http://192.168.69.149:3000/${item}`
                   )
                 }
               />
@@ -251,15 +251,18 @@ export default ListingDetailsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f8f8",
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 10,
     paddingTop: 20,
   },
   closeButton: {
     position: "absolute",
-    top: 20,
+    top: 10,
     right: 20,
     zIndex: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 25,
+    padding: 5,
   },
   mapFallback: {
     height: RFValue(100),
