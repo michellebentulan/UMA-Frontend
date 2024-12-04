@@ -21,6 +21,51 @@ const LearnScreen: React.FC = () => {
       description: "All about goat farming.",
     },
     {
+      title:
+        "Pekin Duck Farming Part 1: Pekin Duck Industry in the Philippines",
+      department: "Agribusiness How It Works",
+      videoUrl: "https://www.youtube.com/embed/V2R2M1eqx28?si=ETxmkuOrIuF_M1P6", // YouTube video URL
+      imageUrl: "",
+      description:
+        "It explores the industry's current status, marketing evolution, and challenges faced by major producers, including issues related to importation.",
+    },
+    {
+      title:
+        "Pekin Duck Farming Part 2 : How to Raise Pekin Duck | Agribusiness Philippines",
+      department: "Agribusiness How It Works",
+      videoUrl: "https://www.youtube.com/embed/H3N5S3TaUmQ?si=_qeJLM5X90aU2HLj", // YouTube video URL
+      imageUrl: "",
+      description:
+        "This segment discusses the prerequisites and considerations for raising Pekin ducks, offering instructional guidance for starting a Pekin duck farming business.",
+    },
+    {
+      title:
+        "Pekin Duck Breeding Part 1 : Pekin Duck Breeding in the Philippines | Agribusiness Philippines",
+      department: "Agribusiness How It Works",
+      videoUrl: "https://www.youtube.com/embed/zr3b3D7N9cw?si=N5-GxqBqfrogFiAw", // YouTube video URL
+      imageUrl: "",
+      description:
+        "video examines the growing interest in Pekin duck breeding within the country, providing insights into breeding practices.",
+    },
+
+    {
+      title:
+        "Pekin Duck Breeding Part 2 : Pekin duck Breeding Management | Agribusiness Philippines",
+      department: "Agribusiness How It Works",
+      videoUrl: "https://www.youtube.com/embed/zr3b3D7N9cw?si=N5-GxqBqfrogFiAw", // YouTube video URL
+      imageUrl: "",
+      description:
+        "video examines the growing interest in Pekin duck breeding within the country, providing insights into breeding practices.",
+    },
+    {
+      title: "Cattle Farming in the Philippines",
+      department: "Agribusiness How It Works",
+      videoUrl: "https://www.youtube.com/embed/0TGTuWy1w4g?si=C_xcUEPgyJsH7v9e", // YouTube video URL
+      imageUrl: "",
+      description: "All about goat farming.",
+    },
+
+    {
       title: "Understanding Animal Breeding",
       department: "Livestock Research Center",
       videoUrl: "",

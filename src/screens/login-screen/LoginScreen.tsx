@@ -52,7 +52,7 @@ const LoginScreen = () => {
       // Attempt to login
       console.log("Attempting login...");
       const response = await axios.post(
-        "http://192.168.74.149:3000/users/login",
+        "http://192.168.29.149:3000/users/login",
         {
           phone_number: phoneNumber,
           password: password,

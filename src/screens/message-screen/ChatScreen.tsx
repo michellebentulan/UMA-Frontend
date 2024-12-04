@@ -83,7 +83,7 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
         }
 
         const response = await axios.get(
-          `http://192.168.74.149:3000/messages/${conversationId}`,
+          `http://192.168.29.149:3000/messages/${conversationId}`,
           {
             headers: {
               Authorization: `Bearer ${sessionToken}`,
@@ -273,7 +273,7 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
   //         type: "image/jpeg",
   //       } as any);
 
-  //       const serverAddress = "http://192.168.74.149:3000"; // Replace with your server address
+  //       const serverAddress = "http://192.168.29.149:3000"; // Replace with your server address
   //       const response = await axios.post(
   //         `${serverAddress}/messages/upload`,
   //         formData,
@@ -346,7 +346,7 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
           type: "image/jpeg",
         } as any);
 
-        const serverAddress = "http://192.168.74.149:3000"; // Replace with your server address
+        const serverAddress = "http://192.168.29.149:3000"; // Replace with your server address
         const response = await axios.post(
           `${serverAddress}/messages/upload`,
           formData,

@@ -62,4 +62,5 @@ export type RootStackParamList = {
     listingId: number; // Parameter to navigate to ListingDetailsScreen
   };
   NotificationScreen: undefined;
+  SettingsScreen: undefined;
 };
