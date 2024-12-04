@@ -87,16 +87,18 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
     paddingBottom: 5,
+    fontFamily: "Montserrat_400Regular",
   },
   title: {
     fontSize: 20,
     fontWeight: "700",
     color: "#2c3e50",
     marginBottom: 5,
+    // fontFamily: "Montserrat_400Regular",
   },
   department: {
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: 15,
+    fontFamily: "Montserrat_400Regular",
     color: "#95a5a6",
   },
   mediaContainer: {
@@ -117,9 +119,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   description: {
-    fontSize: 16,
+    fontSize: 17,
     lineHeight: 22,
     color: "#7f8c8d",
+    fontFamily: "Montserrat_400Regular",
   },
   article: {
     fontSize: 16,
@@ -129,7 +132,7 @@ const styles = StyleSheet.create({
   readMore: {
     fontSize: 16,
     color: "#e91e63",
-    fontWeight: "600",
+    fontFamily: "Montserrat_400Regular",
     marginTop: 10,
   },
 });

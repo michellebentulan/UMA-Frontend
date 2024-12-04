@@ -52,7 +52,7 @@ const MessageScreen = ({ bottomNavOpacity, bottomNavTranslateY }: any) => {
         await initializeSocket(); // Initialize the socket
 
         const response = await axios.get(
-          "http://192.168.69.149:3000/conversations",
+          "http://192.168.29.149:3000/conversations",
           {
             headers: {
               Authorization: `Bearer ${sessionToken}`, // Use the session token obtained from login
@@ -61,7 +61,7 @@ const MessageScreen = ({ bottomNavOpacity, bottomNavTranslateY }: any) => {
         );
         setMessages(response.data);
       } catch (error) {
-        console.error("Error fetching conversations:", error);
+        // console.error("Error fetching conversations:", error);
       }
     };
 
@@ -188,6 +188,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 8,
     fontSize: 16,
+    fontFamily: "Montserrat_400Regular",
   },
   messageItem: {
     flexDirection: "row",

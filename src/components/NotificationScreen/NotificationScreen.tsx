@@ -35,7 +35,7 @@ const NotificationScreen: React.FC = () => {
 
         // Fetch notifications for the logged-in user
         const response = await axios.get(
-          `http://192.168.69.149:3000/notifications?userId=${userId}`
+          `http://192.168.29.149:3000/notifications?userId=${userId}`
         );
         setNotifications(response.data);
       } catch (error) {
@@ -78,7 +78,7 @@ const NotificationScreen: React.FC = () => {
   const markNotificationAsRead = async (notificationId: number) => {
     try {
       await axios.patch(
-        `http://192.168.69.149:3000/notifications/${notificationId}`,
+        `http://192.168.29.149:3000/notifications/${notificationId}`,
         {
           read: true,
         }

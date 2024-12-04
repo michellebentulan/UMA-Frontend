@@ -83,7 +83,7 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
         }
 
         const response = await axios.get(
-          `http://192.168.69.149:3000/messages/${conversationId}`,
+          `http://192.168.29.149:3000/messages/${conversationId}`,
           {
             headers: {
               Authorization: `Bearer ${sessionToken}`,
@@ -118,61 +118,6 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
     // };
   }, [conversationId]);
 
-  // const onSend = (newMessages: IMessage[] = []) => {
-  //   const socket = getSocket(); // Safely retrieve the socket instance
-  //   if (!socket) {
-  //     console.error("Socket is not connected.");
-  //     return;
-  //   }
-
-  //   // Emit new message through Socket.io
-  //   newMessages.forEach((message) => {
-  //     socket.emit("sendMessage", {
-  //       conversationId,
-  //       ...message, // Spread message directly, which already contains the user field
-  //     });
-  //   });
-
-  //   // Update the local message state
-  //   setMessages((previousMessages) =>
-  //     GiftedChat.append(previousMessages, newMessages)
-  //   );
-  // };
-
-  // const onSend = async (newMessages: IMessage[] = []) => {
-  //   const socket = getSocket(); // Safely retrieve the socket instance
-  //   if (!socket) {
-  //     console.error("Socket is not connected.");
-  //     return;
-  //   }
-
-  //   try {
-  //     // Retrieve the logged-in user's ID
-  //     const userId = await AsyncStorage.getItem("userId");
-  //     if (!userId) {
-  //       console.error("User ID not found. Cannot send message.");
-  //       return;
-  //     }
-
-  //     // Emit new message through Socket.io for each message in the newMessages array
-  //     newMessages.forEach((message) => {
-  //       socket.emit("sendMessage", {
-  //         conversationId,
-  //         content: message.text,
-  //         senderId: userId, // Use the logged-in user's ID
-  //         imageUrl: message.image || null, // Include image if there is one
-  //       });
-  //     });
-
-  //     // Update the local message state to immediately reflect the new message
-  //     setMessages((previousMessages) =>
-  //       GiftedChat.append(previousMessages, newMessages)
-  //     );
-  //   } catch (error) {
-  //     console.error("Error while sending message:", error);
-  //   }
-  // };
-
   const onSend = async (newMessages: IMessage[] = []) => {
     const socket = getSocket(); // Safely retrieve the socket instance
     if (!socket) {
@@ -198,18 +143,6 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
 
         // Emit to socket server
         socket.emit("sendMessage", formattedMessage);
-
-        // Update the local state with GiftedChat format
-        // const localMessage = {
-        //   ...message,
-        //   _id: message._id || Math.random().toString(),
-        //   user: {
-        //     _id: userId,
-        //   },
-        // };
-        // setMessages((previousMessages) =>
-        //   GiftedChat.append(previousMessages, [localMessage])
-        // );
       });
     } catch (error) {
       console.error("Error while sending message:", error);
@@ -245,6 +178,147 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
     );
   };
 
+  // const selectImage = async () => {
+  //   const result = await ImagePicker.launchImageLibraryAsync({
+  //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  //     allowsEditing: true,
+  //     aspect: [4, 3],
+  //     quality: 1,
+  //   });
+
+  //   if (!result.canceled && result.assets && result.assets.length > 0) {
+  //     const selectedImage = result.assets[0].uri;
+  //     const imageMessage = {
+  //       _id: Math.random().toString(),
+  //       createdAt: new Date(),
+  //       text: "",
+  //       image: selectedImage,
+  //       user: {
+  //         _id: 1,
+  //       },
+  //     };
+  //     const socket = getSocket(); // Safely retrieve the socket instance
+  //     if (!socket) {
+  //       console.error("Socket is not connected.");
+  //       return;
+  //     }
+  //     // Send image message via socket
+  //     socket.emit("sendMessage", {
+  //       conversationId,
+  //       ...imageMessage,
+  //     });
+
+  //     // Update local state
+  //     setMessages((previousMessages) =>
+  //       GiftedChat.append(previousMessages, [imageMessage])
+  //     );
+  //   }
+  // };
+
+  // const selectImage = async () => {
+  //   const result = await ImagePicker.launchImageLibraryAsync({
+  //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  //     allowsEditing: true,
+  //     aspect: [4, 3],
+  //     quality: 1,
+  //   });
+
+  //   if (!result.canceled && result.assets && result.assets.length > 0) {
+  //     const selectedImage = result.assets[0].uri;
+  //     const socket = getSocket(); // Safely retrieve the socket instance
+  //     if (!socket) {
+  //       console.error("Socket is not connected.");
+  //       return;
+  //     }
+
+  //     const newImageMessage = {
+  //       _id: Math.random().toString(),
+  //       createdAt: new Date(),
+  //       text: "",
+  //       imageUrl: selectedImage, // Correctly include the image URL here
+  //       user: {
+  //         _id: userId || -1,
+  //       },
+  //     };
+
+  //     // Send image message via socket
+  //     socket.emit("sendMessage", {
+  //       conversationId,
+  //       ...newImageMessage,
+  //     });
+
+  //     // Update local state
+  //     setMessages((previousMessages) =>
+  //       GiftedChat.append(previousMessages, [newImageMessage])
+  //     );
+  //   }
+  // };
+
+  // const selectImage = async () => {
+  //   const result = await ImagePicker.launchImageLibraryAsync({
+  //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  //     allowsEditing: true,
+  //     aspect: [4, 3],
+  //     quality: 1,
+  //   });
+
+  //   if (!result.canceled && result.assets && result.assets.length > 0) {
+  //     const selectedImage = result.assets[0].uri;
+
+  //     try {
+  //       const formData = new FormData();
+  //       formData.append("file", {
+  //         uri: selectedImage,
+  //         name: "image.jpg", // Customize the file name
+  //         type: "image/jpeg",
+  //       } as any);
+
+  //       const serverAddress = "http://192.168.29.149:3000"; // Replace with your server address
+  //       const response = await axios.post(
+  //         `${serverAddress}/messages/upload`,
+  //         formData,
+  //         {
+  //           headers: {
+  //             "Content-Type": "multipart/form-data",
+  //           },
+  //         }
+  //       );
+
+  //       const imageUrl = response.data.url;
+
+  //       // Create a new image message with the URL returned from the server
+  //       const newImageMessage = {
+  //         _id: Math.random().toString(),
+  //         createdAt: new Date(),
+  //         text: "",
+  //         image: imageUrl,
+  //         user: {
+  //           _id: userId || -1,
+  //         },
+  //       };
+
+  //       const socket = getSocket(); // Safely retrieve the socket instance
+  //       if (!socket) {
+  //         console.error("Socket is not connected.");
+  //         return;
+  //       }
+
+  //       // Send image message via socket
+  //       socket.emit("sendMessage", {
+  //         conversationId,
+  //         ...newImageMessage,
+  //       });
+
+  //       // Update local state
+  //       setMessages((previousMessages) =>
+  //         GiftedChat.append(previousMessages, [newImageMessage])
+  //       );
+  //     } catch (error) {
+  //       console.error("Error uploading image:", error);
+  //     }
+  //   }
+  // };
+
   const selectImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -255,30 +329,64 @@ const ChatScreen = ({ route }: ChatScreenProps) => {
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const selectedImage = result.assets[0].uri;
-      const imageMessage = {
-        _id: Math.random().toString(),
-        createdAt: new Date(),
-        text: "",
-        image: selectedImage,
-        user: {
-          _id: 1,
-        },
-      };
-      const socket = getSocket(); // Safely retrieve the socket instance
-      if (!socket) {
-        console.error("Socket is not connected.");
-        return;
-      }
-      // Send image message via socket
-      socket.emit("sendMessage", {
-        conversationId,
-        ...imageMessage,
-      });
 
-      // Update local state
-      setMessages((previousMessages) =>
-        GiftedChat.append(previousMessages, [imageMessage])
-      );
+      try {
+        // Retrieve session token
+        const sessionToken = await AsyncStorage.getItem("sessionToken");
+        if (!sessionToken) {
+          console.error("Session token not found");
+          return;
+        }
+
+        // Prepare form data
+        const formData = new FormData();
+        formData.append("file", {
+          uri: selectedImage,
+          name: "image.jpg", // Customize the file name
+          type: "image/jpeg",
+        } as any);
+
+        const serverAddress = "http://192.168.29.149:3000"; // Replace with your server address
+        const response = await axios.post(
+          `${serverAddress}/messages/upload`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${sessionToken}`, // Add the authorization header
+            },
+          }
+        );
+
+        const imageUrl = response.data.url;
+
+        // Create a new image message with the URL returned from the server
+        const newImageMessage = {
+          _id: Math.random().toString(),
+          createdAt: new Date(),
+          text: "",
+          imageUrl: imageUrl, // Make sure this matches your backend's property name
+          user: {
+            _id: userId || -1,
+          },
+        };
+
+        const socket = getSocket(); // Safely retrieve the socket instance
+        if (!socket) {
+          console.error("Socket is not connected.");
+          return;
+        }
+
+        // Send image message via socket
+        socket.emit("sendMessage", {
+          conversationId,
+          ...newImageMessage,
+        });
+
+        // **IMPORTANT**: Remove the manual state update here to prevent duplicates.
+      } catch (error) {
+        console.error("Error uploading image:", error);
+      }
     }
   };
 

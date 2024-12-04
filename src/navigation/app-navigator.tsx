@@ -9,7 +9,6 @@ import OTPVerificationScreen from "../screens/otp-pin-screen/OTPVerificationScre
 import { RootStackParamList } from "./type";
 import CompleteProfileScreen from "../screens/complete-profile-screen/CompleteProfileScreen";
 import ChatScreen from "../screens/message-screen/ChatScreen";
-import Home from "../screens/home-screen/home";
 import MessageScreen from "../screens/message-screen/MessageScreen";
 import HomeScreen1 from "../screens/home-screen/homelayout";
 import SellLivestockScreen from "../screens/sell-livestock-screen/SellLivestockScreen";
@@ -18,6 +17,7 @@ import MapViewScreen from "../components/MapViewScreen/MapViewScreen";
 import ProfileScreen from "../screens/profile-screen/ProfileScreen";
 import ListingDetailsScreen from "../components/ListingDetailsScreen/ListingDetailsScreen";
 import NotificationScreen from "../components/NotificationScreen/NotificationScreen";
+import SettingsScreen from "../screens/settings-screen/SettingsScreen";
 // import NotificationScreen from "../components/NotificationScreen/NotificationScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>(); // Pass your types here
@@ -100,6 +100,11 @@ const AppNavigator = () => {
         <Stack.Screen
           name="ListingDetailsScreen"
           component={ListingDetailsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="SettingsScreen"
+          component={SettingsScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

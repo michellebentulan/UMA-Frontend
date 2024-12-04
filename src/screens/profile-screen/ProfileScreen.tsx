@@ -105,7 +105,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
         // Fetch user profile
         const response = await axios.get(
-          `http://192.168.69.149:3000/users/${userId}`
+          `http://192.168.29.149:3000/users/${userId}`
         );
         const userData = response.data;
 
@@ -116,7 +116,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
           setPhoneNumber(userData.phone_number);
           if (userData.profile_image) {
             setProfileImageUrl(
-              `http://192.168.69.149:3000/uploads/profile-images/${userData.profile_image}`
+              `http://192.168.29.149:3000/uploads/profile-images/${userData.profile_image}`
             );
           }
 
@@ -132,7 +132,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
               userData.barangay
             );
             const locationResponse = await axios.get(
-              `http://192.168.69.149:3000/locations?town=${userData.town}&barangay=${userData.barangay}`
+              `http://192.168.29.149:3000/locations?town=${userData.town}&barangay=${userData.barangay}`
             );
             const locationData = locationResponse.data;
 
@@ -165,7 +165,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
     try {
       // Fetch For Sale listings
       const sellResponse = await axios.get(
-        `http://192.168.69.149:3000/livestock-listings?userId=${userId}`
+        `http://192.168.29.149:3000/livestock-listings?userId=${userId}`
       );
 
       const filteredSellListings = sellResponse.data
@@ -178,7 +178,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
       // Fetch Looking For listings
       const requestedResponse = await axios.get(
-        `http://192.168.69.149:3000/requested-listings?userId=${userId}`
+        `http://192.168.29.149:3000/requested-listings?userId=${userId}`
       );
       const filteredRequestedListings = requestedResponse.data
         .filter(
@@ -293,6 +293,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
     lastScrollY.current = currentOffset;
   };
 
+  const handleSettingsPress = () => {
+    navigation.navigate("SettingsScreen");
+  };
+
   const renderSellLivestockCard = ({ item }: { item: SellListing }) => {
     // Construct image URLs properly
     const livestockImageUrls =
@@ -300,9 +304,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
         ? item.images.map((image) =>
             image.includes("http")
               ? image
-              : `http://192.168.69.149:3000/${image.replace(/\\/g, "/")}`
+              : `http://192.168.29.149:3000/${image.replace(/\\/g, "/")}`
           )
-        : ["http://192.168.69.149:3000/uploads/livestock-images/default.png"]; // Fallback to a default image if none provided
+        : ["http://192.168.29.149:3000/uploads/livestock-images/default.png"]; // Fallback to a default image if none provided
 
     console.log("Livestock Image URLs:", livestockImageUrls);
 
@@ -348,7 +352,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
     <View style={styles.container}>
       {/* Header with Menu Button Only */}
       <View style={styles.headerContainer}>
-        <TouchableOpacity style={styles.menuButton}>
+        <TouchableOpacity
+          style={styles.menuButton}
+          onPress={handleSettingsPress}
+        >
           <Ionicons name="settings-outline" size={RFValue(20)} color="black" />
         </TouchableOpacity>
       </View>

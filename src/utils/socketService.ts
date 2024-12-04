@@ -4,7 +4,7 @@ import { io, Socket } from "socket.io-client";
 // Define the type for the socket instance
 let socket: Socket | null = null;
 
-const SOCKET_URL = "http://192.168.69.149:3000"; // Replace with your backend URL
+const SOCKET_URL = "http://192.168.29.149:3000"; // Replace with your backend URL
 
 export const initializeSocket = async (): Promise<Socket | null> => {
   // If socket is already initialized, return it.
@@ -46,7 +46,7 @@ export const initializeSocket = async (): Promise<Socket | null> => {
     // Handle disconnection events
     socket.on("disconnect", (reason) => {
       console.log("Disconnected from Socket.io server");
-      console.warn("Socket disconnected:", reason);
+      // console.warn("Socket disconnected:", reason);
     });
 
     // Handle connection errors
